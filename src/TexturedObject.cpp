@@ -10,22 +10,12 @@
 #include "TexturedObjectStats.h"
 #include "TexturedObjectGC.h"
 
-ofTexture* TexturedObject::missingTex = NULL;
-ofTexture* TexturedObject::errorTex = NULL;
-ofTexture* TexturedObject::cancelingTex = NULL;
-vector<ofTexture*> TexturedObject::loadingTex = vector<ofTexture*>();
-float TexturedObject::unloadTextureDelayDefaults = 3.0;
-
 TexturedObject::TexturedObject(){
 	isSetup = false;
-/*
-	isAutoUpdating = false;
-    #ifdef TARGET_OSX
-    //sometimes crashes on windows
-        TexturedObjectStats::one().addTextureObject(this);
-    #endif
-*/
+	resizeQuality = CV_INTER_CUBIC;
+	ofAddListener(ofEvents().update, this, &TexturedObject::update);
 }
+
 
 void TexturedObject::deleteWithGC(){
 
@@ -33,10 +23,10 @@ void TexturedObject::deleteWithGC(){
 	//see if any of our textures are being loaded
 	//cancel loading if that's the case
 	for(int j = 0; j < textures.size(); j++){
-		map<ImageSize, ImageUnit>::iterator it = textures[j].sizes.begin();
+		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
 		while(it != textures[j].sizes.end()){
 
-			ImageUnit & texUnit = it->second; //out shortcut to the current texUnit
+			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit
 			if(texUnit.state == LOADING_TEXTURE){
 				texUnit.loader->stopLoadingAsap();
 				texUnit.loader = NULL;
@@ -50,8 +40,9 @@ void TexturedObject::deleteWithGC(){
 }
 
 
+#pragma mark -
 // TEXTURE COMMANDS
-ofTexture* TexturedObject::requestTexture(ImageSize s, int index, bool highPriority, bool withMipmaps){
+ofTexture* TexturedObject::requestTexture(TexturedObjectSize s, int index, bool highPriority, bool withMipmaps){
 
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
@@ -59,34 +50,32 @@ ofTexture* TexturedObject::requestTexture(ImageSize s, int index, bool highPrior
 		return NULL;
 	}
 
-	ImageUnit & texUnit = textures[index].sizes[s];
-	//LOG  << getInfo(texUnit.size, texUnit.index);
+	TextureUnit & texUnit = textures[index].sizes[s];
+	//ofLogNotice("TexturedObject")  << getInfo(texUnit.size, texUnit.index);
 
 	bool addToQueue = resolveQueueRedundancies(texUnit, LOAD_TEXTURE);
 
 	if(addToQueue){
-		//LOG << "add command to queue";
+		//ofLogNotice("TexturedObject") << "add command to queue";
 		TextureCommand c;
 		c.action = LOAD_TEXTURE;
 		c.withMipmaps = withMipmaps;
 		c.highPriority = highPriority;
 		texUnit.pendingCommands.push_back(c);
-	}else{
-		//LOG << "remove last command to queue - they cancel each other with this one" << getInfo(texUnit.size, texUnit.index);
 	}
 	return texUnit.texture;
 }
 
-void TexturedObject::releaseTexture(ImageSize s, int index, float delay){
+void TexturedObject::releaseTexture(TexturedObjectSize s, int index, float delay){
 
-	//LOG;
+	//ofLogNotice("TexturedObject");
 	SETUP_CHECK
 	if(!textureExists(s, index)){
 		ofLogError() << "TexturedObject tex does not exist!";
 		return;
 	}
 
-	ImageUnit & texUnit = textures[index].sizes[s];
+	TextureUnit & texUnit = textures[index].sizes[s];
 
 	if(delay <= 0.0f){
 
@@ -97,22 +86,26 @@ void TexturedObject::releaseTexture(ImageSize s, int index, float delay){
 			c.action = UNLOAD_TEXTURE;
 			texUnit.pendingCommands.push_back(c);
 		}else{
-			//LOG_NOTICE << "remove last command to queue - they cancel each other with this one" << getInfo(texUnit.size, texUnit.index);
+			//ofLogNotice("TexturedObject")_NOTICE << "remove last command to queue - they cancel each other with this one" << getInfo(texUnit.size, texUnit.index);
 		}
 	}else{
 		texUnit.scheduledUnloads.push_back(ofGetElapsedTimef() + delay);
 	}
 }
+#pragma mark -
 
-
-bool TexturedObject::resolveQueueRedundancies(ImageUnit& texUnit, TextureAction myAction){
+bool TexturedObject::resolveQueueRedundancies(TextureUnit& texUnit, TextureAction myAction){
 
 	//lets see if my action cancels the previous one - b4 we enque the command
 	bool addToQueue = false;
 	if(texUnit.pendingCommands.size()){
-		TextureAction lastActionInPendingQueue = texUnit.pendingCommands[texUnit.pendingCommands.size()-1].action;
-		if(lastActionInPendingQueue == myAction){
+		TextureCommand lastCommand = texUnit.pendingCommands[texUnit.pendingCommands.size()-1];
+		if(lastCommand.action == myAction){
 			addToQueue = true;
+		}else{ //2 actions cancel each other - whichever is the textLoad action, needs to get notified
+			TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+			event.absolutePath = getLocalTexturePath(texUnit.size, texUnit.index);
+			pendingLoadEventNotifications.push_back(event);
 		}
 	}else{
 		addToQueue = true;
@@ -126,10 +119,13 @@ bool TexturedObject::resolveQueueRedundancies(ImageUnit& texUnit, TextureAction 
 }
 
 TexturedObject::~TexturedObject(){
-	//todo delete textures structure!
-	//LOG << "destructor TexturedObject we have " << textures.size() << " textures "<< this ;
+
+	//ofLogNotice("TexturedObject") << "destructor TexturedObject we have " << textures.size() << " textures "<< this ;
+
+	ofRemoveListener(ofEvents().update, this, &TexturedObject::update);
+
 	for(int i = 0; i < textures.size(); i++){
-		map<ImageSize, ImageUnit>::iterator it = textures[i].sizes.begin();
+		map<TexturedObjectSize, TextureUnit>::iterator it = textures[i].sizes.begin();
 		while(it != textures[i].sizes.end()){
 			it->second.texture->clear();
 			delete it->second.texture;
@@ -140,14 +136,14 @@ TexturedObject::~TexturedObject(){
 }
 
 
-void TexturedObject::setup(int numTextures, ImageSize s){
-	vector<ImageSize> sizes;
+void TexturedObject::setup(int numTextures, TexturedObjectSize s){
+	vector<TexturedObjectSize> sizes;
 	sizes.push_back(s);
 	TexturedObject::setup(numTextures, sizes);
 }
 
 
-void TexturedObject::setup(int numTextures, vector<ImageSize> validImageSizes){
+void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImageSizes){
 
 	if(isSetup){
         ofLogError() << "TexturedObject already setup!"; return;
@@ -155,10 +151,10 @@ void TexturedObject::setup(int numTextures, vector<ImageSize> validImageSizes){
 
 	//alloc all ofTextures
 	for(int j = 0; j < numTextures; j++){
-		ImageSizeUnit allSizesUnit;
+		TexturedObjectSizeUnit allSizesUnit;
 		for(int i = 0; i < validImageSizes.size(); i++){
-			ImageSize s = (ImageSize)validImageSizes[i];
-			ImageUnit unit;
+			TexturedObjectSize s = (TexturedObjectSize)validImageSizes[i];
+			TextureUnit unit;
 			unit.texture = new ofTexture();
 			unit.size = s;
 			unit.index = j;
@@ -167,89 +163,32 @@ void TexturedObject::setup(int numTextures, vector<ImageSize> validImageSizes){
 		}
 		textures.push_back(allSizesUnit);
 	}
+	TexturedObjectStats::one().addTextureObject(this);
 	isSetup = true;
 }
 
-void TexturedObject::registerToTextureStats(){	
-	TexturedObjectStats::one().addTextureObject(this);
-}
-
-
-void TexturedObject::setTextures(ofTexture* missing, ofTexture* error, ofTexture* canceling, vector<ofTexture*> loading){
-	missingTex = missing;
-	errorTex = error;
-	loadingTex = loading;
-	cancelingTex = canceling;
-}
 
 #pragma mark -
 
-void TexturedObject::loadTexture(TextureCommand c, ImageUnit & texUnit){
+void TexturedObject::loadTexture(TextureCommand c, TextureUnit & texUnit){
 
-	//LOG << "load tex " << getInfo(texUnit.size, texUnit.index);
+	//ofLogNotice("TexturedObject") << "load tex " << getInfo(texUnit.size, texUnit.index);
+	string path = getLocalTexturePath(texUnit.size, texUnit.index);
 
 	if(texUnit.loadCount == 0){ //only load a texture when its not loaded already
-/*
-	TextureLoadEventArg arg;
-	ofTexture * returnTex = NULL;
-
-	if(index < textures.size() ){
-
-		string path = getLocalImagePath(s, index);
-        
-        //cout<<"TexturedObject::loadTexture "<<path<<endl;
-        
-		ImageUnit & texUnit = textures[index].sizes[s];
-		returnTex = textures[index].sizes[s].texture; //we return a ptr to the texture that will hold the requested image
-
-
-		if(texUnit.loadCount == 0){
-
-			//LOG << "starting tex load from disk";
-			//store essential info about this texture to be able to retrieve it back once we get a "loaded" event out of the blue
-			TextureInfo texInfo;
-			texInfo.index = index;
-			texInfo.size = s;
-			texPathToTexInfo[path] = texInfo;
-
-			if(texUnit.loader == NULL){ //tex not being loaded
-
-				ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
-				ofxProgressiveTextureLoad * loader = q->loadTexture(path,
-																	textures[index].sizes[s].texture,
-																	true,
-																	IMAGE_RESIZE_QUALITY,
-																	highPriority
-																	);
-				texUnit.fullyloaded = false;
-				texUnit.readyToDraw = false;
-				texUnit.errorLoading = false;
-				texUnit.canceledLoad = false;
-				ofAddListener(loader->textureReady, this, &TexturedObject::textureDidLoad); //subscribe to img loaded event
-				ofAddListener(loader->textureDrawable, this, &TexturedObject::textureIsReadyToDraw); //subscribe to img ready event
-				texUnit.loader = loader;
-			}else{
-				LOG_ERROR << "loader already exists!? tex already being requested to load!" << getInfo(s, index);
-				//TODO! store whoever requested the texture to notify them when the tex is ready!
-			}
-
-		}else{ //texture is loaded or being loaded
-*/
-
-		string path = getLocalTexturePath(texUnit.size, texUnit.index);
 
 		if(texUnit.loader == NULL){ //tex not being loaded
 			storeTexPathInfo(texUnit, path); //store essential info about this texture to be able to retrieve it back once we get a "loaded" event out of the blue
 			texUnit.loader = addToLoadQueue(texUnit.texture, c.withMipmaps, c.highPriority, path);
 			texUnit.state = LOADING_TEXTURE;
 			setFlags(texUnit, false, false, false, false);
-			//LOG << "loading tex now! adding job to load queue " << getInfo(texUnit.size, texUnit.index);
-
+			//ofLogNotice("TexturedObject") << "loading tex now! adding job to load queue " << getInfo(texUnit.size, texUnit.index);
 		}else{
 			ofLogError("TexturedObject") << "loader already exists!? tex already being requested to load!" << getInfo(texUnit.size, texUnit.index);
 		}
 	}else{
-		TextureLoadEventArg event = TextureLoadEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+		TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+		event.absolutePath = path;
 		ofNotifyEvent(textureLoaded, event, this);
 	}
 
@@ -259,14 +198,14 @@ void TexturedObject::loadTexture(TextureCommand c, ImageUnit & texUnit){
 
 
 
-void TexturedObject::unloadTexture(TextureCommand c, ImageUnit & texUnit){
+void TexturedObject::unloadTexture(TextureCommand c, TextureUnit & texUnit){
 
-	//LOG << "unloadTexture " << getInfo(texUnit.size, texUnit.index);
+	//ofLogNotice("TexturedObject") << "unloadTexture " << getInfo(texUnit.size, texUnit.index);
 
 	if(texUnit.loadCount == 1){ //last reference to this texture
 
 		if(texUnit.state == LOADING_TEXTURE){ //currently loading, lets cancel the loading.
-			//LOG << "we are in the middle of loading a texture - cant unload right away " << getInfo(texUnit.size, texUnit.index);
+			//ofLogNotice("TexturedObject") << "we are in the middle of loading a texture - cant unload right away " << getInfo(texUnit.size, texUnit.index);
 			texUnit.loader->stopLoadingAsap();
 			texUnit.loader = NULL;
 			texUnit.state = WAITING_FOR_CANCEL_TO_FINISH;
@@ -287,14 +226,15 @@ void TexturedObject::unloadTexture(TextureCommand c, ImageUnit & texUnit){
 
 #pragma mark -
 
-void TexturedObject::update(){
+void TexturedObject::update(ofEventArgs &arg){
 
 	for(int j = 0; j < textures.size(); j++){
-		map<ImageSize, ImageUnit>::iterator it = textures[j].sizes.begin();
+
+		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
 
 		while(it != textures[j].sizes.end()){
 
-			ImageUnit & texUnit = it->second; //out shortcut to the current texUnit
+			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit
 
 			//see if any of the future sceduled unloads is due
 			for(int i = 0; i < texUnit.scheduledUnloads.size(); i++ ){
@@ -302,16 +242,13 @@ void TexturedObject::update(){
 					texUnit.scheduledUnloads.erase(texUnit.scheduledUnloads.begin());
 					bool addToQueue = resolveQueueRedundancies(texUnit, UNLOAD_TEXTURE);
 					if(addToQueue){
-						//LOG << "SCHEDULED UNLOAD - add UNLOAD command to queue";
+						//ofLogNotice("TexturedObject") << "SCHEDULED UNLOAD - add UNLOAD command to queue";
 						TextureCommand c;
 						c.action = UNLOAD_TEXTURE;
 						texUnit.pendingCommands.push_back(c);
-					}else{
-						//LOG << " SCHEDULED UNLOAD - remove last command to queue - they cancel each other with this one";
 					}
 				}
 			}
-
 
 			switch (texUnit.state) {
 
@@ -337,7 +274,7 @@ void TexturedObject::update(){
 				case WAITING_FOR_CANCEL_TO_FINISH:{
 
 					if(texUnit.loaderResponses.size()){
-						ofxProgressiveTextureLoad::textureEvent r = texUnit.loaderResponses[0];
+						ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent r = texUnit.loaderResponses[0];
 						texUnit.loaderResponses.erase(texUnit.loaderResponses.begin());
 
 						if (r.readyToDraw){ //we got a ready to draw while waiting for cancel, lets ignore it.
@@ -358,7 +295,7 @@ void TexturedObject::update(){
 				case LOADING_TEXTURE:{
 
 					while(texUnit.loaderResponses.size()){
-						ofxProgressiveTextureLoad::textureEvent r = texUnit.loaderResponses[0];
+						ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent r = texUnit.loaderResponses[0];
 						texUnit.loaderResponses.erase(texUnit.loaderResponses.begin());
 
 						if (r.ok){ //whatever u were doing, did it go ok?
@@ -370,13 +307,17 @@ void TexturedObject::update(){
 							}else{
 								if(r.fullyLoaded){ //tex is ready, notify end user!
 									texUnit.loader = NULL;
-									TextureLoadEventArg event = TextureLoadEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+									TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+									event.absolutePath = r.texturePath;
+									event.elapsedTime = r.elapsedTime;
 									ofNotifyEvent(textureLoaded, event, this);
 									texUnit.state = IDLE;
 									setFlags(texUnit, true, true, false, false);
 								}else{
 									if(r.readyToDraw){ //tex is ready to draw but not fully loaded, notify end user
-										TextureLoadEventArg event = TextureLoadEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+										TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+										event.absolutePath = r.texturePath;
+										event.elapsedTime = r.elapsedTime;
 										ofNotifyEvent(textureReadyToDraw, event, this);
 										setFlags(texUnit, false, true, false, false);
 									}else{ //tex is not ready to draw and not fully loaded - wtf?
@@ -388,11 +329,13 @@ void TexturedObject::update(){
 								}
 							}
 						}else{
-							ofLogError("TexturedObject") << "tex load did fail!" << getInfo(texUnit.size, texUnit.index);
+							ofLogError("TexturedObject") << "\ntex load did fail!" << getInfo(texUnit.size, texUnit.index);
 							texUnit.loader = NULL;
 							texUnit.state = IDLE;
 							setFlags(texUnit, false, false, true, false);
-							TextureLoadEventArg event = TextureLoadEventArg(false, this, texUnit.texture, texUnit.size, texUnit.index);
+							TextureEventArg event = TextureEventArg(false, this, texUnit.texture, texUnit.size, texUnit.index);
+							event.absolutePath = r.texturePath;
+							event.elapsedTime = r.elapsedTime;
 							ofNotifyEvent(textureLoaded, event, this);
 						}
 					}
@@ -411,20 +354,26 @@ void TexturedObject::update(){
 			++it;
 		}
 	}
+
+	while(pendingLoadEventNotifications.size() > 0){
+		ofNotifyEvent(textureReadyToDraw, pendingLoadEventNotifications[0], this);
+		ofNotifyEvent(textureLoaded, pendingLoadEventNotifications[0], this);
+		pendingLoadEventNotifications.erase(pendingLoadEventNotifications.begin());
+	}
 }
 
 
 #pragma mark -
 
 
-void TexturedObject::textureIsReadyToDraw(ofxProgressiveTextureLoad::textureEvent &e){
+void TexturedObject::textureIsReadyToDraw(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e){
 
-	ImageSize s = texPathToTexInfo[e.texturePath].size;
+	TexturedObjectSize s = texPathToTexInfo[e.texturePath].size;
 	int index = texPathToTexInfo[e.texturePath].index;
-	//LOG << "textureIsReadyToDraw event " << getInfo(s, index) << " event loadr:" << e.who;
 
 	TEX_EXISTS_CHECK
-	ImageUnit & texUnit = textures[index].sizes[s];
+
+	TextureUnit & texUnit = textures[index].sizes[s];
 
 	if(texUnit.state == LOADING_TEXTURE){
 		texUnit.loaderResponses.push_back(e);
@@ -434,50 +383,50 @@ void TexturedObject::textureIsReadyToDraw(ofxProgressiveTextureLoad::textureEven
 }
 
 
-void TexturedObject::textureDidLoad(ofxProgressiveTextureLoad::textureEvent &e){
+void TexturedObject::textureDidLoad(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e){
 
-	ImageSize s = texPathToTexInfo[e.texturePath].size;
+	TexturedObjectSize s = texPathToTexInfo[e.texturePath].size;
 	int index = texPathToTexInfo[e.texturePath].index;
-	//LOG << "textureDidLoad event " << getInfo(s, index) << " event loadr:" << e.who;
+	//ofLogNotice("TexturedObject") << "textureDidLoad event " << getInfo(s, index) << " event loadr:" << e.who;
 
 	TEX_EXISTS_CHECK
 
-	ImageUnit & texUnit = textures[index].sizes[s];
+	TextureUnit & texUnit = textures[index].sizes[s];
 	texUnit.loaderResponses.push_back(e);
 }
 
 
 #pragma mark -
 
-void TexturedObject::setFlags(ImageUnit& texUnit, bool loaded, bool readytoDraw, bool error, bool canceled){
+void TexturedObject::setFlags(TextureUnit& texUnit, bool loaded, bool readytoDraw, bool error, bool canceled){
 	texUnit.fullyloaded = loaded;
 	texUnit.readyToDraw = readytoDraw;
 	texUnit.errorLoading = error;
 	texUnit.canceledLoad = canceled;
 }
 
-void TexturedObject::storeTexPathInfo(ImageUnit & texUnit, const string & path){
+void TexturedObject::storeTexPathInfo(TextureUnit & texUnit, const string & path){
 	TextureInfo texInfo;
 	texInfo.index = texUnit.index;
 	texInfo.size = texUnit.size;
 	texPathToTexInfo[path] = texInfo;
 }
 
-void TexturedObject::checkLoadCount(ImageUnit & u){
+void TexturedObject::checkLoadCount(TextureUnit & u){
 	if(u.loadCount < 0){
-		ofLogError("TexturedObject") << "trying to load tex, but got negative count! " << getInfo(u.size, u.index);
+		ofLogError("TexturedObject") << "Texture retain count is Negative!! resetting to zero. This can lead to texture leaks!" << getInfo(u.size, u.index);
 		u.loadCount = 0;
 	}
 }
 
 
-bool TexturedObject::textureExists(ImageSize s, int index){
+bool TexturedObject::textureExists(TexturedObjectSize s, int index){
 
 	bool exists = true;
 	if(index < 0 || index > textures.size() - 1){
 		exists = false;
 	}else{
-		map<ImageSize, ImageUnit>::iterator it = textures[index].sizes.find(s);
+		map<TexturedObjectSize, TextureUnit>::iterator it = textures[index].sizes.find(s);
 		if(it == textures[index].sizes.end()){
 			exists = false;
 		}
@@ -491,9 +440,9 @@ bool TexturedObject::isLoadingTextures(){
 	SETUP_CHECK_RET_FALSE
 	int numLoading = 0;
 	for(int j = 0; j < textures.size(); j++){
-		map<ImageSize, ImageUnit>::iterator it = textures[j].sizes.begin();
+		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
 		while(it != textures[j].sizes.end()){
-			ImageUnit & texUnit = it->second; //out shortcut to the current texUnit
+			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit
 			++it;
 			if(texUnit.state != IDLE) numLoading ++;
 		}
@@ -504,7 +453,7 @@ bool TexturedObject::isLoadingTextures(){
 
 
 
-int TexturedObject::getRetainCount(ImageSize s, int index){
+int TexturedObject::getRetainCount(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
 		return 0;
@@ -513,7 +462,7 @@ int TexturedObject::getRetainCount(ImageSize s, int index){
 }
 
 
-int TexturedObject::getTotalLoadCount(ImageSize s, int index){
+int TexturedObject::getTotalLoadCount(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
 		return 0;
@@ -521,7 +470,7 @@ int TexturedObject::getTotalLoadCount(ImageSize s, int index){
 	return textures[index].sizes[s].totalLoadCount;
 }
 
-bool TexturedObject::isReadyToDraw(ImageSize s, int index){
+bool TexturedObject::isReadyToDraw(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_FALSE
 	if(!textureExists(s, index)){
 		return false;
@@ -530,7 +479,23 @@ bool TexturedObject::isReadyToDraw(ImageSize s, int index){
 }
 
 
-bool TexturedObject::isWaitingForCancelToFinish(ImageSize s, int index){
+bool TexturedObject::isLoading(TexturedObjectSize s, int index){
+	SETUP_CHECK_RET_NULL
+	if(!textureExists(s, index)){
+		return textures[index].sizes[s].state == LOADING_TEXTURE;
+	}
+	return false;
+}
+
+bool TexturedObject::isUnloading(TexturedObjectSize s, int index){
+	SETUP_CHECK_RET_NULL
+	if(!textureExists(s, index)){
+		return textures[index].sizes[s].state == WAITING_FOR_CANCEL_TO_FINISH;
+	}
+	return false;
+}
+
+bool TexturedObject::isWaitingForCancelToFinish(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
 		return 0;
@@ -539,7 +504,7 @@ bool TexturedObject::isWaitingForCancelToFinish(ImageSize s, int index){
 }
 
 
-bool TexturedObject::isFullyLoaded(ImageSize s, int index){
+bool TexturedObject::isFullyLoaded(TexturedObjectSize s, int index){
 
 	SETUP_CHECK_RET_FALSE
 	if(!textureExists(s, index)){
@@ -549,25 +514,25 @@ bool TexturedObject::isFullyLoaded(ImageSize s, int index){
 }
 
 
-bool TexturedObject::gotErrorLoading(ImageSize s, int index){
+bool TexturedObject::gotErrorLoading(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_FALSE
 	return textures[index].sizes[s].errorLoading;
 }
 
-bool TexturedObject::loadWasCanceled(ImageSize s, int index){
+bool TexturedObject::loadWasCanceled(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_FALSE
 	return textures[index].sizes[s].canceledLoad;
 }
 
 
 ofTexture* TexturedObject::getLoadingTexture(){
-	if(loadingTex.size() == 0) return NULL;
-	int index = (int)(ofGetFrameNum() * 0.3) % loadingTex.size();
-	return loadingTex[index];
+	if(TexturedObjectConfig::one().loadingTex.size() == 0) return NULL;
+	int index = (int)(ofGetFrameNum() * 0.3) % TexturedObjectConfig::one().loadingTex.size();
+	return TexturedObjectConfig::one().loadingTex[index];
 }
 
 
-ofTexture* TexturedObject::getTexture(ImageSize s, int index){
+ofTexture* TexturedObject::getTexture(TexturedObjectSize s, int index){
 
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
@@ -575,29 +540,29 @@ ofTexture* TexturedObject::getTexture(ImageSize s, int index){
 		return NULL;
 	}
 
-	ImageUnit & texUnit = textures[index].sizes[s];
+	TextureUnit & texUnit = textures[index].sizes[s];
 
 	if(texUnit.loadCount > 0){
 
 		switch (texUnit.state) {
 			case IDLE:
-				if(texUnit.errorLoading) return errorTex;
+				if(texUnit.errorLoading) return TexturedObjectConfig::one().errorTex;
 				else return texUnit.texture;
 
 			case LOADING_TEXTURE:
 				if(texUnit.readyToDraw) return texUnit.texture;
 				return getLoadingTexture();
-
 		}
 	}else{
 		if(texUnit.state == WAITING_FOR_CANCEL_TO_FINISH){
-			return cancelingTex;
+			return TexturedObjectConfig::one().cancelingTex;
 		}
 	}
-	return missingTex;
+	return TexturedObjectConfig::one().missingTex;
 }
 
-ofTexture* TexturedObject::getRealTexture(ImageSize s, int index){
+
+ofTexture* TexturedObject::getRealTexture(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
 		ofLogError("TexturedObject") << "TexturedObject tex does not exist!";
@@ -612,29 +577,33 @@ ofxProgressiveTextureLoad* TexturedObject::addToLoadQueue(ofTexture * tex, bool 
 	ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
 	ofxProgressiveTextureLoad * loader = q->loadTexture(path,	/*file path*/
 														tex,	/*ofTexture* where to load*/
-														true,	/*MIP-MAPS - create them!*/
-														IMAGE_RESIZE_QUALITY,
+														mipmap,	/*MIP-MAPS - create them!*/
+														resizeQuality,
 														highPriority /*load priority - put at end of queue or beginning*/
 														);
+
 	ofAddListener(loader->textureReady, this, &TexturedObject::textureDidLoad); //subscribe to img loaded event
 	ofAddListener(loader->textureDrawable, this, &TexturedObject::textureIsReadyToDraw); //subscribe to img ready event
 	return loader;
 }
 
 
-string TexturedObject::getInfo(ImageSize s, int index){
+string TexturedObject::getInfo(TexturedObjectSize s, int index){
 	stringstream info;
-	info << " obj: "  << this
-		<< " loadC: " << textures[index].sizes[s].loadCount
-		<< " texIdx: " << index
-		<< " alloc: " << string(textures[index].sizes[s].texture->isAllocated() ? "yes": "no") 
-		<< " tex: " << textures[index].sizes[s].texture
-		//<< " readyToDraw: " << textures[index].sizes[s].readyToDraw
-		<< " waitingForCancelToFinish: " << string((textures[index].sizes[s].state == WAITING_FOR_CANCEL_TO_FINISH) ? " 1" : "0")
-		<< " canceled: " << textures[index].sizes[s].canceledLoad
-		//<< " pendClear: " << texturesPendingClear.size()
-		<< " loader: " << textures[index].sizes[s].loader
-		<< " state: " << textures[index].sizes[s].state;
+	string tab = "  ";
+	info << "\n" + tab + "obj: "  << this
+		<< tab + "loadC: " << textures[index].sizes[s].loadCount
+		<< tab + "texIdx: " << index
+		<< tab + "alloc: " << string(textures[index].sizes[s].texture->isAllocated() ? "yes": "no")
+		<< tab + "tex: " << textures[index].sizes[s].texture
+		//<< "readyToDraw: " << textures[index].sizes[s].readyToDraw
+		<< tab + "waitingForCancelToFinish: " << string((textures[index].sizes[s].state == WAITING_FOR_CANCEL_TO_FINISH) ? " 1" : "0")
+		<< tab + "canceled: " << textures[index].sizes[s].canceledLoad
+		//<< "pendClear: " << texturesPendingClear.size()
+		<< tab + "loader: " << textures[index].sizes[s].loader
+		<< tab + "file: " << getLocalTexturePath(s, index)
+		//<< " state: " << textures[index].sizes[s].state;
+	;
  	return info.str();
 }
 

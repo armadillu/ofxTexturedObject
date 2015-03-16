@@ -33,14 +33,13 @@ public:
 	void removeTextureObject(TexturedObject * obj){
 
 		mutex.lock();
-		map<TexturedObject*, vector<TexturedObject::ImageSizeUnit>* >::iterator it;
+		map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* >::iterator it;
 		it = objectTexturesData.find(obj);
 		if (it != objectTexturesData.end() ){
 			objectTexturesData.erase(it);
 		}
 		mutex.unlock();
 	}
-
 
 	void update(){
 
@@ -49,26 +48,25 @@ public:
 		loadedTexturesCount = 0;
 		loadedTextureRealCount = 0;
 
-		//this assume we are only using RIVER_IMAGE_SIZE and ZOOMABLE_IMAGE_SIZE! todo!
-		for(int j = 0 ; j < IMG_NUM_SIZES; j++){
+		for(int j = 0 ; j < TEXTURE_OBJECT_NUM_SIZES; j++){
 			countBySize[j] = 0;
 		}
 
 		mutex.lock();
-		map<TexturedObject*, vector<TexturedObject::ImageSizeUnit>* >::iterator it;
+		map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* >::iterator it;
 		it = objectTexturesData.begin();
 		while( it != objectTexturesData.end()){
 
-			vector<TexturedObject::ImageSizeUnit>* textures = it->second;
+			vector<TexturedObject::TexturedObjectSizeUnit>* textures = it->second;
 
 			for(int i = 0; i < textures->size(); i++){
 
-				TexturedObject::ImageSizeUnit & imageSizes = textures->at(i);
+				TexturedObject::TexturedObjectSizeUnit & imageSizes = textures->at(i);
 
-				map<ImageSize, TexturedObject::ImageUnit>::iterator it2 = imageSizes.sizes.begin();
+				map<TexturedObjectSize, TexturedObject::TextureUnit>::iterator it2 = imageSizes.sizes.begin();
 				while( it2 != imageSizes.sizes.end() ){
 
-					ImageSize imgSize = it2->first;
+					TexturedObjectSize imgSize = it2->first;
 
 					if(it2->second.loadCount > 0){
 						loadedTexturesCount ++;
@@ -88,29 +86,33 @@ public:
 
 	void draw(int x, int y){
 
-		//if(ofGetFrameNum()%30 == 1){
+		//not all the time TODO!
+		if(ofGetFrameNum()%30 == 0){
 			update();
-		//}
+		}
 		
 		string msg;
 		uint64_t usedBytes = pixelsInGPU * 3 /*rgb*/ * 1.333f /*mipmaps*/;
 
-		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount)  +
-		"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount)  +
-		"\n(" + ofToString(countBySize[RIVER_IMAGE_SIZE])
-		+ " small, " +
-		ofToString(countBySize[ZOOMABLE_IMAGE_SIZE]) + " big) " +
-		"Used Vram: " + ofToString(ofxSimpleHttp::bytesToHumanReadable(usedBytes,2));
+		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount) +
+		"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount);
+		msg += "\nUsed Vram: " + ofToString(ofxSimpleHttp::bytesToHumanReadable(usedBytes,2)) + "\n";
+
+		for(int i = 0; i < TEXTURE_OBJECT_NUM_SIZES; i++){
+			msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
+		}
+
+
 		ofDrawBitmapStringHighlight(msg, x, y);
 	}
 
 private:
 
-	map<TexturedObject*, vector<TexturedObject::ImageSizeUnit>* > objectTexturesData;
+	map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* > objectTexturesData;
 
 	int loadedTexturesCount;
 	int loadedTextureRealCount;
-	int countBySize[IMG_NUM_SIZES];
+	int countBySize[TEXTURE_OBJECT_NUM_SIZES];
 
 	uint64_t pixelsInGPU;
 

@@ -44,7 +44,7 @@ void TexturedObjectGC::update(ofEventArgs &a){
 			indicesToDelete.push_back(i);
 
 		}else{
-			ofLog() << "not yet...";
+			ofLogNotice("TexturedObjectGC") << "still waiting to delete " << pendingDeletion[i] << "..." ;
 		}
 	}
 	for(int i = indicesToDelete.size() - 1; i >= 0; i--){
