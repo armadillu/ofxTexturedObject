@@ -253,7 +253,6 @@ private:
 	void textureDidLoad(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e);
 	void textureIsReadyToDraw(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e);
 
-
 	//return true if you should add your action to queue, false if not.
 	bool resolveQueueRedundancies(TextureUnit& texUnit, TextureAction myAction);
 
@@ -285,7 +284,7 @@ private:
 
 	void unloadTexture(TextureCommand c, TextureUnit & texUnit);
 
-	//those are convering the notifications that would have been lost otherwise
+	//those are covering the notifications that would have been lost otherwise
 	//bc they are "eaten up" by queue redundancies (ie "load + unload + load" = "load")
 	//they will trigger both textureReadyToDraw and textureLoaded events
 	vector<TextureEventArg> pendingLoadEventNotifications;
