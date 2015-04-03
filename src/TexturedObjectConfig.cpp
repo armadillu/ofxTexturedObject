@@ -25,3 +25,13 @@ void TexturedObjectConfig::setTextures(ofTexture* missing,
 	loadingTex = loading;
 	cancelingTex = canceling;
 }
+
+
+void TexturedObjectConfig::setDefaultTextureUnloadDelay(float seconds){
+	unloadTextureDelayDefaults = seconds;
+}
+
+
+float TexturedObjectConfig::getDefaultTextureUnloadDelay(){
+	return unloadTextureDelayDefaults;
+}
