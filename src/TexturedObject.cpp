@@ -189,6 +189,7 @@ void TexturedObject::loadTexture(TextureCommand c, TextureUnit & texUnit){
 	}else{
 		TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
 		event.absolutePath = path;
+		ofNotifyEvent(textureReadyToDraw, event, this);
 		ofNotifyEvent(textureLoaded, event, this);
 	}
 
