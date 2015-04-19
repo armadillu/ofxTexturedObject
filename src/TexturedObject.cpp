@@ -578,6 +578,7 @@ ofxProgressiveTextureLoad* TexturedObject::addToLoadQueue(ofTexture * tex, bool 
 	ofxProgressiveTextureLoad * loader = q->loadTexture(path,	/*file path*/
 														tex,	/*ofTexture* where to load*/
 														mipmap,	/*MIP-MAPS - create them!*/
+														!mipmap, //only do ARB if no mipmaps are requested
 														resizeQuality,
 														highPriority /*load priority - put at end of queue or beginning*/
 														);
