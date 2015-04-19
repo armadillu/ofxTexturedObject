@@ -130,7 +130,6 @@ void ofApp::update(){
 	q->setScanlinesPerLoop(scanlinesPerLoop);
 	q->setMaximumRequestsPerFrame(maxTexRequestsPerFrame);
 	q->setNumberSimultaneousLoads( maxThreads ); //N threads loading images in the bg
-	q->update();
 
 	if(resetAll){
 		for(int i = 0; i < numObj; i++){
