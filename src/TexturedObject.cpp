@@ -369,8 +369,8 @@ void TexturedObject::update(ofEventArgs &arg){
 
 void TexturedObject::textureIsReadyToDraw(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e){
 
-	TexturedObjectSize s = texPathToTexInfo[e.texturePath].size;
-	int index = texPathToTexInfo[e.texturePath].index;
+	TexturedObjectSize s = texToTexInfo[e.tex].size;
+	int index = texToTexInfo[e.tex].index;
 
 	TEX_EXISTS_CHECK
 
@@ -386,8 +386,8 @@ void TexturedObject::textureIsReadyToDraw(ofxProgressiveTextureLoad::Progressive
 
 void TexturedObject::textureDidLoad(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e){
 
-	TexturedObjectSize s = texPathToTexInfo[e.texturePath].size;
-	int index = texPathToTexInfo[e.texturePath].index;
+	TexturedObjectSize s = texToTexInfo[e.tex].size;
+	int index = texToTexInfo[e.tex].index;
 	//ofLogNotice("TexturedObject") << "textureDidLoad event " << getInfo(s, index) << " event loadr:" << e.who;
 
 	TEX_EXISTS_CHECK
@@ -410,7 +410,7 @@ void TexturedObject::storeTexPathInfo(TextureUnit & texUnit, const string & path
 	TextureInfo texInfo;
 	texInfo.index = texUnit.index;
 	texInfo.size = texUnit.size;
-	texPathToTexInfo[path] = texInfo;
+	texToTexInfo[texUnit.texture] = texInfo;
 }
 
 void TexturedObject::checkLoadCount(TextureUnit & u){

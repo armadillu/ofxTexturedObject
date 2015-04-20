@@ -247,7 +247,7 @@ private:
 	//each image has several sizes available.
 
 	//given a texture file path, store its ID and imgSize
-	unordered_map<string, TextureInfo> texPathToTexInfo;
+	unordered_map<ofTexture*, TextureInfo> texToTexInfo;
 
 	//texture loader callbacks
 	void textureDidLoad(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e);
