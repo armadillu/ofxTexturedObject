@@ -33,13 +33,13 @@ void ofApp::setup(){
 	// Setup TexturedObjectConfig /////////////////////////
 
 	loading = new ofTexture();
-	ofLoadImage(*loading, "loading.png");
+	ofLoadImage(*loading, "TexturedObjectStates/loading.png");
 	cancel = new ofTexture();
-	ofLoadImage(*cancel, "loadCancel.png");
+	ofLoadImage(*cancel, "TexturedObjectStates/canceling.png");
 	error = new ofTexture();
-	ofLoadImage(*error, "loadError.png");
+	ofLoadImage(*error, "TexturedObjectStates/error.png");
 	missing = new ofTexture();
-	ofLoadImage(*missing, "missing.png");
+	ofLoadImage(*missing, "TexturedObjectStates/missing.png");
 
 	vector<ofTexture*> loadingTexs;
 	loadingTexs.push_back(loading);
