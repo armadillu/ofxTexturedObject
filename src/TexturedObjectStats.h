@@ -96,7 +96,7 @@ public:
 
 		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount) +
 		"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount);
-		msg += "\nUsed Vram: " + ofToString(ofxSimpleHttp::bytesToHumanReadable(usedBytes,2)) + "\n";
+		msg += "\nUsed Vram: " + ofxSimpleHttp::bytesToHumanReadable(usedBytes, 2) + "\n";
 
 		for(int i = 0; i < TEXTURE_OBJECT_NUM_SIZES; i++){
 			msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
