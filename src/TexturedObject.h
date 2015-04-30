@@ -114,11 +114,11 @@ public:
 							  );
 
 	//call this when you dont need that texture anymore, and it will be unloaded
-	// 	delay - works as a simple "cache", will unload after N seconds
+	// 	delay - works as a simple "cache", will unload after N seconds instead of immediatelly
 
 	void releaseTexture(TexturedObjectSize s,
 						int index,
-						float delaySeconds = 0.0);
+						float delaySeconds = TexturedObjectConfig::one().getDefaultTextureUnloadDelay());
 
 
 	// STATUS COMMANDS ///////////////////////////////////////////////////////////////////////////
