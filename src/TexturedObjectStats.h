@@ -31,7 +31,6 @@ public:
 	}
 
 	void removeTextureObject(TexturedObject * obj){
-
 		mutex.lock();
 		map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* >::iterator it;
 		it = objectTexturesData.find(obj);

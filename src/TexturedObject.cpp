@@ -133,6 +133,8 @@ TexturedObject::~TexturedObject(){
 		}
 	}
 	textures.clear();
+
+	TexturedObjectStats::one().removeTextureObject(this);
 }
 
 
@@ -255,7 +257,7 @@ void TexturedObject::update(ofEventArgs &arg){
 
 				case IDLE:{
 
-					if(texUnit.pendingCommands.size()){
+					while(texUnit.pendingCommands.size()){
 						TextureCommand c = texUnit.pendingCommands[0];
 						texUnit.pendingCommands.erase(texUnit.pendingCommands.begin());
 
