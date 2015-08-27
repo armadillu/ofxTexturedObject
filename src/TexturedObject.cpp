@@ -13,7 +13,6 @@
 TexturedObject::TexturedObject(){
 	isSetup = false;
 	resizeQuality = CV_INTER_CUBIC;
-	ofAddListener(ofEvents().update, this, &TexturedObject::update);
 }
 
 
@@ -122,8 +121,6 @@ TexturedObject::~TexturedObject(){
 
 	//ofLogNotice("TexturedObject") << "destructor TexturedObject we have " << textures.size() << " textures "<< this ;
 
-	ofRemoveListener(ofEvents().update, this, &TexturedObject::update);
-
 	for(int i = 0; i < textures.size(); i++){
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[i].sizes.begin();
 		while(it != textures[i].sizes.end()){
@@ -134,7 +131,11 @@ TexturedObject::~TexturedObject(){
 	}
 	textures.clear();
 
-	TexturedObjectStats::one().removeTextureObject(this);
+	if(isSetup){
+		ofRemoveListener(ofEvents().update, this, &TexturedObject::update);
+		TexturedObjectStats::one().removeTextureObject(this);
+	}
+
 }
 
 
@@ -149,7 +150,9 @@ void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImag
 
 	if(isSetup){
         ofLogError() << "TexturedObject already setup!"; return;
-    }
+	}else{
+		ofAddListener(ofEvents().update, this, &TexturedObject::update);
+	}
 
 	//alloc all ofTextures
 	for(int j = 0; j < numTextures; j++){
