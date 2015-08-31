@@ -77,6 +77,7 @@ public:
 	void setup(int numTextures, TexturedObjectSize size);
 	void setup(int numTextures, vector<TexturedObjectSize> sizes );
 
+	void update();
 
 	// SUBCLASSES MUST IMPLEMENT these methods /////////////////////////////////////////////////
 
@@ -178,13 +179,13 @@ public:
 	ofEvent<TextureEventArg> textureLoaded; //completely loaded
 	ofEvent<TextureEventArg> textureReadyToDraw; //not fully loaded, but drawable! tex->getWidht/height report correct values
 
+
 protected:
 
 	virtual ~TexturedObject(); //dont use this! use deleteWithGC();
 
 private:
 
-	void update(ofEventArgs &arg);
 
 	enum TextureAction{
 		LOAD_TEXTURE,

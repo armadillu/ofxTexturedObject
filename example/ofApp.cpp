@@ -18,7 +18,7 @@ void ofApp::setup(){
 
 	screen = new ofRectangle(0,0,0,0);
 
-	memPlot = new ofxHistoryPlot(NULL, "RAM", 3000, false);
+	memPlot = new ofxHistoryPlot(NULL, "RAM", 1000, false);
 	memPlot->setLowerRange(0);
 	memPlot->setColor( ofColor(0,255,0) ); //color of the plot line
 	memPlot->setShowNumericalInfo(true);  //show the current value and the scale in the plot
@@ -115,7 +115,9 @@ void ofApp::setup(){
 void ofApp::update(){
 
 	mem.update();
-	memPlot->update(mem.getProcessMemory());
+	if(ofGetFrameNum()%3 == 1){
+		memPlot->update(mem.getProcessMemory());
+	}
 
 	if(ofGetFrameNum() > 10){
 		screen->x = ofGetMouseX();

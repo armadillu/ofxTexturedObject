@@ -132,7 +132,7 @@ TexturedObject::~TexturedObject(){
 	textures.clear();
 
 	if(isSetup){
-		ofRemoveListener(ofEvents().update, this, &TexturedObject::update);
+		//ofRemoveListener(ofEvents().update, this, &TexturedObject::update, OF_EVENT_ORDER_BEFORE_APP);
 		TexturedObjectStats::one().removeTextureObject(this);
 	}
 
@@ -151,25 +151,25 @@ void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImag
 	if(isSetup){
         ofLogError() << "TexturedObject already setup!"; return;
 	}else{
-		ofAddListener(ofEvents().update, this, &TexturedObject::update);
-	}
+		//ofAddListener(ofEvents().update, this, &TexturedObject::update, OF_EVENT_ORDER_BEFORE_APP);
 
-	//alloc all ofTextures
-	for(int j = 0; j < numTextures; j++){
-		TexturedObjectSizeUnit allSizesUnit;
-		for(int i = 0; i < validImageSizes.size(); i++){
-			TexturedObjectSize s = (TexturedObjectSize)validImageSizes[i];
-			TextureUnit unit;
-			unit.texture = new ofTexture();
-			unit.size = s;
-			unit.index = j;
+		//alloc all ofTextures
+		for(int j = 0; j < numTextures; j++){
+			TexturedObjectSizeUnit allSizesUnit;
+			for(int i = 0; i < validImageSizes.size(); i++){
+				TexturedObjectSize s = (TexturedObjectSize)validImageSizes[i];
+				TextureUnit unit;
+				unit.texture = new ofTexture();
+				unit.size = s;
+				unit.index = j;
 
-			allSizesUnit.sizes[s] = unit;
+				allSizesUnit.sizes[s] = unit;
+			}
+			textures.push_back(allSizesUnit);
 		}
-		textures.push_back(allSizesUnit);
+		TexturedObjectStats::one().addTextureObject(this);
+		isSetup = true;
 	}
-	TexturedObjectStats::one().addTextureObject(this);
-	isSetup = true;
 }
 
 
@@ -232,7 +232,7 @@ void TexturedObject::unloadTexture(TextureCommand c, TextureUnit & texUnit){
 
 #pragma mark -
 
-void TexturedObject::update(ofEventArgs &arg){
+void TexturedObject::update(){
 
 	for(int j = 0; j < textures.size(); j++){
 

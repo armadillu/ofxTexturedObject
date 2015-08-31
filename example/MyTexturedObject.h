@@ -39,10 +39,12 @@ public:
 
 		//this is important in terms of memory usage - resizing large images to create mipmaps
 		//takes a lot of memory - especially in 32 bit mode you can quickly run out of RAM
-		setResizeQuality(CV_INTER_NN);
+		setResizeQuality(CV_INTER_AREA);
 	}
 
 	void update(float speedFactor, float unloadDelay_, bool withMipmaps){
+
+		TexturedObject::update();
 
 		mipmaps = withMipmaps;
 		unloadDelay = unloadDelay_;
