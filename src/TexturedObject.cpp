@@ -234,6 +234,7 @@ void TexturedObject::unloadTexture(TextureCommand c, TextureUnit & texUnit){
 
 void TexturedObject::update(){
 
+	float timeNow = ofGetElapsedTimef();
 	for(int j = 0; j < textures.size(); j++){
 
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
@@ -244,7 +245,7 @@ void TexturedObject::update(){
 
 			//see if any of the future sceduled unloads is due
 			for(int i = 0; i < texUnit.scheduledUnloads.size(); i++ ){
-				if( texUnit.scheduledUnloads[i] < ofGetElapsedTimef()){
+				if( texUnit.scheduledUnloads[i] < timeNow){
 					texUnit.scheduledUnloads.erase(texUnit.scheduledUnloads.begin());
 					bool addToQueue = resolveQueueRedundancies(texUnit, UNLOAD_TEXTURE);
 					if(addToQueue){
