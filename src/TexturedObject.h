@@ -77,7 +77,13 @@ public:
 	void setup(int numTextures, TexturedObjectSize size);
 	void setup(int numTextures, vector<TexturedObjectSize> sizes );
 
-	void update();
+	void update(float timeNow = ofGetElapsedTimef()); 	//arg should be ofGetElapsedTimef();
+														//as ofGetElapsedTimef() is quite an expensive call
+														//it's better if you made it once outside your for loop
+														//ie float timeNow = ofGetElapsedTimef();
+														//and feed the float into the update() method of all the
+														//TexturedObjects inside your app... Otherwise there's a
+														//ofGetElapsedTimef() call per object and that's a waste
 
 	// SUBCLASSES MUST IMPLEMENT these methods /////////////////////////////////////////////////
 

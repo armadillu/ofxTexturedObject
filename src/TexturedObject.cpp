@@ -232,9 +232,8 @@ void TexturedObject::unloadTexture(TextureCommand c, TextureUnit & texUnit){
 
 #pragma mark -
 
-void TexturedObject::update(){
+void TexturedObject::update(float timeNow){
 
-	float timeNow = ofGetElapsedTimef();
 	for(int j = 0; j < textures.size(); j++){
 
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
