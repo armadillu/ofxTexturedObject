@@ -6,12 +6,10 @@
 //
 //
 
-#ifndef CollectionTable_TexturedObjectStats_h
-#define CollectionTable_TexturedObjectStats_h
+#pragma once
 
 #include "ofMain.h"
 #include "TexturedObject.h"
-#include "ofxSimpleHttp.h"
 #include "ofxTimeMeasurements.h"
 
 class TexturedObjectStats{
@@ -95,7 +93,7 @@ public:
 
 		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount) +
 		"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount);
-		msg += "\nUsed Vram: " + ofxSimpleHttp::bytesToHumanReadable(usedBytes, 2) + "\n";
+		msg += "\nUsed Vram: " + bytesToHumanReadable(usedBytes, 2) + "\n";
 
 		for(int i = 0; i < TEXTURE_OBJECT_NUM_SIZES; i++){
 			msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
@@ -116,6 +114,24 @@ private:
 	uint64_t pixelsInGPU;
 
 	ofMutex mutex;
+
+	string bytesToHumanReadable(long long bytes, int decimalPrecision){
+		string ret;
+		if (bytes < 1024 ){ //if in bytes range
+			ret = ofToString(bytes) + " bytes";
+		}else{
+			if (bytes < 1024 * 1024){ //if in kb range
+				ret = ofToString(bytes / float(1024), decimalPrecision) + " KB";
+			}else{
+				if (bytes < (1024 * 1024 * 1024)){ //if in Mb range
+					ret = ofToString(bytes / float(1024 * 1024), decimalPrecision) + " MB";
+				}else{
+					ret = ofToString(bytes / float(1024 * 1024 * 1024), decimalPrecision) + " GB";
+				}
+			}
+		}
+		return ret;
+	}
+
 };
 
-#endif
