@@ -72,9 +72,9 @@ public:
 	void draw(){
 
 		ofSetColor(255);
-		if((texLoaded || texReadyToDraw)){
+		//if((texLoaded || texReadyToDraw)){
 			getTexture(TEXTURE_ORIGINAL, 0)->draw(me);
-		}
+		//}
 
 		if(onScreen){
 			if(waitingForTex){

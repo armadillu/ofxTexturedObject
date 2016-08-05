@@ -3,7 +3,7 @@
 #include "TexturedObjectStats.h"
 
 int numObj = 100;
-float objectSize = 50;
+float objectSize = 80;
 
 
 void ofApp::setup(){
