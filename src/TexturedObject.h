@@ -87,8 +87,9 @@ public:
 
 	// SUBCLASSES MUST IMPLEMENT these methods /////////////////////////////////////////////////
 
-	//this should give you texture dimensions even if texture is not loaded.
-	//It's your subclass's job to figure out those.
+	//this should report texture dimensions even if texture is not loaded.
+	//It's your subclass's job to figure out those - you can either preload all assets at startup and store
+	//their dimensions, or ideally the dimensions already come from the CMS - you just need to store them
 	virtual ofVec2f getTextureDimensions(TexturedObjectSize s, int index) = 0;
 
 	//This is where your subclass specifies where actual texture files are.
@@ -154,7 +155,6 @@ public:
 	//the same tex* (if the index & size are valid)
 	//regardles of the tex being loaded or not
 	//which means the returned texture might not be loaded, or mid loading,
-
 	ofTexture* getRealTexture(TexturedObjectSize s, int index);
 
  	//How many textures does this object have (as specified on setup())
@@ -170,15 +170,13 @@ public:
 
 
 	// OBJECT DELETION ///////////////////////////////////////////////////////////////////////////
-
-	//NEVER EVER EVER delete a TexturedObject directly, or you will get a crash if a thread is loading it!
+	// Some Rules to follow when destroying TexturedObjects:
+	// 1 - don't ever call delete on a texturedObject - call object->deleteWithGC() instead.
+	// 2 - after calling deleteWithGC(), the object can be destroyed at any time by the GC - so your pointer is invalid! Dont use it anymore!
+	// 3 - implement deleteWithGC() in your subclass, delete all members that require so
+	// 4 - call TexturedObject::deleteWithGC(); from your custom MyObject::deleteWithGC();
+	// 0 - NEVER EVER EVER delete a TexturedObject directly, or you will get a crash if a thread is still loading it!
 	virtual void deleteWithGC() = 0; // call this instead of delete!
-
-	//from that point on, you are not supposed to access the pointer or you might get a crash
-	//the object will be deleted when possible by the background garbage collector (TexturedObjectGC).
-	//you must implement this in your subclass if your subclass has stuff to dealocate
-	//and from there, call TexturedObject::deleteWithGC()
-
 
 	// PUBLIC OF EVENTS //////////////////////////////////////////////////////////////////////////
 
