@@ -99,8 +99,9 @@ public:
 			msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
 		}
 
+		msg = msg.substr(0, msg.size()-1);
 
-		ofDrawBitmapStringHighlight(msg, x, y);
+		ofDrawBitmapStringHighlight(msg, x, y, ofColor::black, ofColor::yellow);
 	}
 
 private:
