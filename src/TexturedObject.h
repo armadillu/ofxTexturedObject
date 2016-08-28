@@ -90,10 +90,10 @@ public:
 	//this should report texture dimensions even if texture is not loaded.
 	//It's your subclass's job to figure out those - you can either preload all assets at startup and store
 	//their dimensions, or ideally the dimensions already come from the CMS - you just need to store them
-	virtual ofVec2f getTextureDimensions(TexturedObjectSize s, int index) = 0;
+	virtual ofVec2f getTextureDimensions(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0) = 0;
 
 	//This is where your subclass specifies where actual texture files are.
-	virtual string getLocalTexturePath(TexturedObjectSize, int index) = 0;
+	virtual string getLocalTexturePath(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0) = 0;
 
 
 	// CONFIG //////////////////////////////////////////////////////////////////////////////////
@@ -115,8 +115,8 @@ public:
 	//	highPriority - will put the command at the beggining of the load queue
 	//	withMipmaps - load mipmaps for this texture as you load id
 
-	ofTexture* requestTexture(TexturedObjectSize texSize,
-							  int index,
+	ofTexture* requestTexture(TexturedObjectSize s = TEXTURE_ORIGINAL,
+							  int index = 0,
 							  bool highPriority = false,
 							  bool withMipmaps = true
 							  );
@@ -124,20 +124,20 @@ public:
 	//call this when you dont need that texture anymore, and it will be unloaded
 	// 	delay - works as a simple "cache", will unload after N seconds instead of immediatelly
 
-	void releaseTexture(TexturedObjectSize s,
-						int index,
+	void releaseTexture(TexturedObjectSize s = TEXTURE_ORIGINAL,
+						int index = 0,
 						float delaySeconds = TexturedObjectConfig::one().getDefaultTextureUnloadDelay());
 
 
 	// STATUS COMMANDS ///////////////////////////////////////////////////////////////////////////
 
 
-	bool isLoading(TexturedObjectSize s, int index);
-	bool isUnloading(TexturedObjectSize s, int index);
+	bool isLoading(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
+	bool isUnloading(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 
-	bool isReadyToDraw(TexturedObjectSize s, int index);
-	bool isFullyLoaded(TexturedObjectSize s, int index);
-	bool isWaitingForCancelToFinish(TexturedObjectSize s, int index);
+	bool isReadyToDraw(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
+	bool isFullyLoaded(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
+	bool isWaitingForCancelToFinish(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 
 	bool isLoadingTextures(); //if ANY of the textures indexes / sizes of the object being "worked on"?
 
@@ -149,13 +149,13 @@ public:
 	//still loading, or a "error" tex* if there was a loading error,
 	//or "canceled" tex if tex load was canceled
 
-	ofTexture* getTexture(TexturedObjectSize s, int index);
+	ofTexture* getTexture(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 
 	//Dumbed down version of the above, will give you
 	//the same tex* (if the index & size are valid)
 	//regardles of the tex being loaded or not
 	//which means the returned texture might not be loaded, or mid loading,
-	ofTexture* getRealTexture(TexturedObjectSize s, int index);
+	ofTexture* getRealTexture(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 
  	//How many textures does this object have (as specified on setup())
 
@@ -163,10 +163,10 @@ public:
         return textures.size();
     }
 
-	int getRetainCount(TexturedObjectSize s, int index); //how many loads are on that textures
-	int getTotalLoadCount(TexturedObjectSize s, int index); //how many times has been loaded since created
-	bool gotErrorLoading(TexturedObjectSize s, int index);
-	bool loadWasCanceled(TexturedObjectSize s, int index);
+	int getRetainCount(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0); //how many loads are on that textures
+	int getTotalLoadCount(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0); //how many times has been loaded since created
+	bool gotErrorLoading(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
+	bool loadWasCanceled(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 
 
 	// OBJECT DELETION ///////////////////////////////////////////////////////////////////////////
