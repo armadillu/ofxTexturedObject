@@ -2,7 +2,7 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 100;
+int numObj = 50;
 float objectSize = 80;
 
 
@@ -48,8 +48,9 @@ void ofApp::setup(){
 	// Setup ProgressiveTextureLoadQueue /////////////////////////
 
 	ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
-	q->setNumberSimultaneousLoads( 8 ); //N threads loading images in the bg
+	q->setNumberSimultaneousLoads( 1 ); //N threads loading images in the bg
 	q->setTexLodBias(0.2); //MipMap sharpness
+	q->setVerbose(false);
 
 	// Setup our TexturedObjects /////////////////////////////////
 
@@ -142,10 +143,12 @@ void ofApp::update(){
 		RUI_PUSH_TO_CLIENT();
 	}
 
+	TS_START("objs");
 	for(int i = 0; i < numObj; i++){
 		objs[i]->update(speedFactor, texUnloadDelay, loadMipMaps);
 		objs[i]->setResizeQuality(resizeQuality);
 	}
+	TS_STOP("objs");
 }
 
 

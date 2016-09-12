@@ -128,7 +128,7 @@ public:
 	void onTexReadyToDraw(TexturedObject::TextureEventArg & a){
 		//LOG;
 		if(a.tex == tex && waitingForTex){
-			ofLogNotice() << "tex ready to draw " << tex;
+			//ofLogNotice() << "tex ready to draw " << tex;
 			ofRemoveListener(textureReadyToDraw, this, &MyTexturedObject::onTexReadyToDraw);
 			texReadyToDraw = true;
 		}
@@ -138,7 +138,7 @@ public:
 	void onTexLoaded(TexturedObject::TextureEventArg & a){
 		//LOG;
 		if(a.tex == tex && waitingForTex){
-			ofLogNotice() << "tex loaded " << tex;
+			//ofLogNotice() << "tex loaded " << tex;
 			ofRemoveListener(textureLoaded, this, &MyTexturedObject::onTexLoaded);
 			waitingForTex = false;
 			texLoaded = true;
