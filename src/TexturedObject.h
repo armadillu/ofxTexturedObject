@@ -113,7 +113,7 @@ public:
 	//	texSize - what tex size to load
 	// 	index - what texture index to load for that object.
 	//	highPriority - will put the command at the beggining of the load queue
-	//	withMipmaps - load mipmaps for this texture as you load id
+	//	withMipmaps - create mipmaps for this texture as you load it
 
 	ofTexture* requestTexture(TexturedObjectSize s = TEXTURE_ORIGINAL,
 							  int index = 0,
