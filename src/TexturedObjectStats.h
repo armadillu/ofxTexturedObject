@@ -82,26 +82,28 @@ public:
 	}
 
 	void draw(int x, int y){
+		ofDrawBitmapStringHighlight(getStatsAsText(), x, y, ofColor::black, ofColor::yellow);
+	}
 
+	string getStatsAsText() {
 		//not all the time TODO!
-		if(ofGetFrameNum()%30 == 0){
+		if (ofGetFrameNum() % 30 == 0) {
 			update();
 		}
-		
+
 		string msg;
 		uint64_t usedBytes = pixelsInGPU * 3 /*rgb*/ * 1.333f /*mipmaps*/;
 
 		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount) +
-		"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount);
+			"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount);
 		msg += "\nUsed Vram: " + bytesToHumanReadable(usedBytes, 2) + "\n";
 
-		for(int i = 0; i < TEXTURE_OBJECT_NUM_SIZES; i++){
+		for (int i = 0; i < TEXTURE_OBJECT_NUM_SIZES; i++) {
 			msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
 		}
 
-		msg = msg.substr(0, msg.size()-1);
-
-		ofDrawBitmapStringHighlight(msg, x, y, ofColor::black, ofColor::yellow);
+		msg = msg.substr(0, msg.size() - 1);
+		return msg;
 	}
 
 private:
