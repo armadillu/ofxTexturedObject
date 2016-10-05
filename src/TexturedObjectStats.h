@@ -99,7 +99,9 @@ public:
 		msg += "\nUsed Vram: " + bytesToHumanReadable(usedBytes, 2) + "\n";
 
 		for (int i = 0; i < TEXTURE_OBJECT_NUM_SIZES; i++) {
-			msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
+			if(countBySize[(TexturedObjectSize)i] > 0){
+				msg += toString((TexturedObjectSize)i) + ": " + ofToString(countBySize[(TexturedObjectSize)i]) + "\n";
+			}
 		}
 
 		msg = msg.substr(0, msg.size() - 1);
