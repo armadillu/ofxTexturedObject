@@ -23,9 +23,9 @@
 using std::tr1::unordered_map;
 #endif
 
-#define SETUP_CHECK				if(!isSetup){ ofLogError() << "TexturedObject being used before setup!"; return; }
-#define SETUP_CHECK_RET_NULL	if(!isSetup){ ofLogError() << "TexturedObject being used before setup!"; return NULL; }
-#define SETUP_CHECK_RET_FALSE	if(!isSetup){ ofLogError() << "TexturedObject being used before setup!"; return false; }
+#define SETUP_CHECK				if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return; }
+#define SETUP_CHECK_RET_NULL	if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return NULL; }
+#define SETUP_CHECK_RET_FALSE	if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return false; }
 #define TEX_EXISTS_CHECK	if(!textureExists(s, index)){ ofLogError() << "TexturedObject tex does not exist!"; return;}
 
 
@@ -76,6 +76,7 @@ public:
 	
 	void setup(int numTextures, TexturedObjectSize size);
 	void setup(int numTextures, vector<TexturedObjectSize> sizes );
+	bool isSetup(){return hasBeenSetup;}
 
 	void update(float timeNow = ofGetElapsedTimef()); 	//arg should be ofGetElapsedTimef();
 														//as ofGetElapsedTimef() is quite an expensive call
@@ -252,7 +253,7 @@ private:
 	//each image has several sizes available.
 
 	//given a texture file path, store its ID and imgSize
-	unordered_map<ofTexture*, TextureInfo> texToTexInfo;
+	map<ofTexture*, TextureInfo> texToTexInfo;
 
 	//texture loader callbacks
 	void textureDidLoad(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e);
@@ -269,7 +270,7 @@ private:
 		float time;
 	};
 
-	bool isSetup;
+	bool hasBeenSetup;
 
 	ofxProgressiveTextureLoad* addToLoadQueue( ofTexture* tex, bool mipmap, bool highPriority, string path);
 

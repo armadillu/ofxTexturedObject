@@ -11,7 +11,7 @@
 #include "TexturedObjectGC.h"
 
 TexturedObject::TexturedObject(){
-	isSetup = false;
+	hasBeenSetup = false;
 	resizeQuality = CV_INTER_CUBIC;
 }
 
@@ -70,7 +70,7 @@ void TexturedObject::releaseTexture(TexturedObjectSize s, int index, float delay
 	//ofLogNotice("TexturedObject");
 	SETUP_CHECK
 	if(!textureExists(s, index)){
-		ofLogError() << "TexturedObject tex does not exist!";
+		ofLogError("TexturedObject") << "TexturedObject tex does not exist!";
 		return;
 	}
 
@@ -117,6 +117,7 @@ bool TexturedObject::resolveQueueRedundancies(TextureUnit& texUnit, TextureActio
 	return addToQueue;
 }
 
+
 TexturedObject::~TexturedObject(){
 
 	//ofLogNotice("TexturedObject") << "destructor TexturedObject we have " << textures.size() << " textures "<< this ;
@@ -131,11 +132,10 @@ TexturedObject::~TexturedObject(){
 	}
 	textures.clear();
 
-	if(isSetup){
+	if(hasBeenSetup){
 		//ofRemoveListener(ofEvents().update, this, &TexturedObject::update, OF_EVENT_ORDER_BEFORE_APP);
 		TexturedObjectStats::one().removeTextureObject(this);
 	}
-
 }
 
 
@@ -148,8 +148,8 @@ void TexturedObject::setup(int numTextures, TexturedObjectSize s){
 
 void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImageSizes){
 
-	if(isSetup){
-        ofLogError() << "TexturedObject already setup!"; return;
+	if(hasBeenSetup){
+        ofLogError("TexturedObject") << "TexturedObject already setup!"; return;
 	}else{
 		//ofAddListener(ofEvents().update, this, &TexturedObject::update, OF_EVENT_ORDER_BEFORE_APP);
 
@@ -168,7 +168,7 @@ void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImag
 			textures.push_back(allSizesUnit);
 		}
 		TexturedObjectStats::one().addTextureObject(this);
-		isSetup = true;
+		hasBeenSetup = true;
 	}
 }
 
