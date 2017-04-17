@@ -132,7 +132,8 @@ void ofApp::update(){
 	q->setTargetTimePerFrame( texLoadTimePerFrame );	//spend at most 'x' milis loading textures per frame
 	q->setScanlinesPerLoop(scanlinesPerLoop);
 	q->setMaximumRequestsPerFrame(maxTexRequestsPerFrame);
-	q->setNumberSimultaneousLoads( maxThreads ); //N threads loading images in the bg
+	q->setMaxThreads( maxThreads ); //N threads loading images in the bg
+	TexturedObjectConfig::one().setDefaultTextureUnloadDelay(texUnloadDelay);
 
 	if(resetAll){
 		for(int i = 0; i < numObj; i++){
@@ -145,7 +146,6 @@ void ofApp::update(){
 
 	TS_START("objs");
 	for(int i = 0; i < numObj; i++){
-		objs[i]->update(speedFactor, texUnloadDelay, loadMipMaps);
 		objs[i]->setResizeQuality(resizeQuality);
 	}
 	TS_STOP("objs");
