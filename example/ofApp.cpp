@@ -147,6 +147,7 @@ void ofApp::update(){
 	TS_START("objs");
 	for(int i = 0; i < numObj; i++){
 		objs[i]->setResizeQuality(resizeQuality);
+		objs[i]->update(speedFactor, texUnloadDelay, loadMipMaps);
 	}
 	TS_STOP("objs");
 }
