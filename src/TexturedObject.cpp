@@ -21,7 +21,7 @@ void TexturedObject::deleteWithGC(){
 	SETUP_CHECK
 	//see if any of our textures are being loaded
 	//cancel loading if that's the case
-	for(int j = 0; j < textures.size(); j++){
+	for(size_t j = 0; j < textures.size(); j++){
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
 		while(it != textures[j].sizes.end()){
 
@@ -122,7 +122,7 @@ TexturedObject::~TexturedObject(){
 
 	//ofLogNotice("TexturedObject") << "destructor TexturedObject we have " << textures.size() << " textures "<< this ;
 
-	for(int i = 0; i < textures.size(); i++){
+	for(size_t i = 0; i < textures.size(); i++){
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[i].sizes.begin();
 		while(it != textures[i].sizes.end()){
 			it->second.texture->clear();
@@ -154,9 +154,9 @@ void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImag
 		//ofAddListener(ofEvents().update, this, &TexturedObject::update, OF_EVENT_ORDER_BEFORE_APP);
 
 		//alloc all ofTextures
-		for(int j = 0; j < numTextures; j++){
+		for(size_t j = 0; j < numTextures; j++){
 			TexturedObjectSizeUnit allSizesUnit;
-			for(int i = 0; i < validImageSizes.size(); i++){
+			for(size_t i = 0; i < validImageSizes.size(); i++){
 				TexturedObjectSize s = (TexturedObjectSize)validImageSizes[i];
 				TextureUnit unit;
 				unit.texture = new ofTexture();
@@ -234,7 +234,7 @@ void TexturedObject::unloadTexture(TextureCommand c, TextureUnit & texUnit){
 
 void TexturedObject::update(float timeNow){
 
-	for(int j = 0; j < textures.size(); j++){
+	for(size_t j = 0; j < textures.size(); j++){
 
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
 
@@ -243,7 +243,7 @@ void TexturedObject::update(float timeNow){
 			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit
 
 			//see if any of the future sceduled unloads is due
-			for(int i = 0; i < texUnit.scheduledUnloads.size(); i++ ){
+			for(size_t i = 0; i < texUnit.scheduledUnloads.size(); i++ ){
 				if( texUnit.scheduledUnloads[i] < timeNow){
 					texUnit.scheduledUnloads.erase(texUnit.scheduledUnloads.begin());
 					bool addToQueue = resolveQueueRedundancies(texUnit, UNLOAD_TEXTURE);
@@ -445,7 +445,7 @@ bool TexturedObject::isLoadingTextures(){
 
 	SETUP_CHECK_RET_FALSE
 	int numLoading = 0;
-	for(int j = 0; j < textures.size(); j++){
+	for(size_t j = 0; j < textures.size(); j++){
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
 		while(it != textures[j].sizes.end()){
 			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit

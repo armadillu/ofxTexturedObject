@@ -36,7 +36,7 @@ void TexturedObjectGC::update(ofEventArgs &a){
 
 	mutex.lock();
 	vector<int> indicesToDelete;
-	for(int i = 0; i < pendingDeletion.size(); i++){
+	for(size_t i = 0; i < pendingDeletion.size(); i++){
 		if (!pendingDeletion[i]->isLoadingTextures()){
 			TexturedObjectStats::one().removeTextureObject(pendingDeletion[i]);
 			delete pendingDeletion[i];

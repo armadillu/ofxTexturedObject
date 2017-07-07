@@ -56,7 +56,7 @@ public:
 
 			vector<TexturedObject::TexturedObjectSizeUnit>* textures = it->second;
 
-			for(int i = 0; i < textures->size(); i++){
+			for(size_t i = 0; i < textures->size(); i++){
 
 				TexturedObject::TexturedObjectSizeUnit & imageSizes = textures->at(i);
 
