@@ -292,8 +292,8 @@ private:
 
 	//those are covering the notifications that would have been lost otherwise
 	//bc they are "eaten up" by queue redundancies (ie "load + unload + load" = "load")
-	//they will trigger both textureReadyToDraw and textureLoaded events
 	vector<TextureEventArg> pendingLoadEventNotifications;
+	vector<TextureEventArg> pendingReadyToDrawEventNotifications;
 
 	int resizeQuality;
 

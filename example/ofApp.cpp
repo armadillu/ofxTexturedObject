@@ -2,7 +2,7 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 400;
+int numObj = 100;
 float objScale = 0.1;
 
 

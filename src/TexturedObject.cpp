@@ -98,13 +98,28 @@ bool TexturedObject::resolveQueueRedundancies(TextureUnit& texUnit, TextureActio
 	//lets see if my action cancels the previous one - b4 we enque the command
 	bool addToQueue = false;
 	if(texUnit.pendingCommands.size()){
-		TextureCommand lastCommand = texUnit.pendingCommands[texUnit.pendingCommands.size()-1];
+		const TextureCommand & lastCommand = texUnit.pendingCommands.front();
 		if(lastCommand.action == myAction){
 			addToQueue = true;
 		}else{ //2 actions cancel each other - whichever is the textLoad action, needs to get notified
+
 			TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
 			event.absolutePath = getLocalTexturePath(texUnit.size, texUnit.index);
-			pendingLoadEventNotifications.push_back(event);
+
+			if(texUnit.state == IDLE){ //if texObj is idle, it means the tex is already loaded
+				pendingLoadEventNotifications.push_back(event);
+				pendingReadyToDrawEventNotifications.push_back(event);
+			}
+
+			if(texUnit.state == LOADING_TEXTURE){ //once its 100% loaded (or ready to load) it will notify
+
+				//it may be that user requests a tex load while tex is already loading
+				//if we get really unlucky, it may be that it requests it after the event ReadyToDraw has triggered
+				//but before the texture is fully loaded (so state == LOADING_TEXTURE). if that's the case, trigger it here manually.
+				if(isReadyToDraw(texUnit.size, texUnit.index)){
+					pendingReadyToDrawEventNotifications.push_back(event);
+				}
+			}
 		}
 	}else{
 		addToQueue = true;
@@ -113,15 +128,13 @@ bool TexturedObject::resolveQueueRedundancies(TextureUnit& texUnit, TextureActio
 	if(!addToQueue){ //remove the last item of the pending commands, as its cancels out with this one
 		texUnit.pendingCommands.erase(texUnit.pendingCommands.begin() + texUnit.pendingCommands.size() - 1);
 	}
-	//resolveQueueRedundancies(texUnit);
 	return addToQueue;
 }
 
 
 TexturedObject::~TexturedObject(){
 
-	//ofLogNotice("TexturedObject") << "destructor TexturedObject we have " << textures.size() << " textures "<< this ;
-
+	//ofLogNotice("TexturedObject") << "destructor TexturedObject we have " << textures.size() << " textures " << this;
 	for(size_t i = 0; i < textures.size(); i++){
 		map<TexturedObjectSize, TextureUnit>::iterator it = textures[i].sizes.begin();
 		while(it != textures[i].sizes.end()){
@@ -192,10 +205,25 @@ void TexturedObject::loadTexture(TextureCommand c, TextureUnit & texUnit){
 			ofLogError("TexturedObject") << "loader already exists!? tex already being requested to load!" << getInfo(texUnit.size, texUnit.index);
 		}
 	}else{
-		TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
-		event.absolutePath = path;
-		ofNotifyEvent(textureReadyToDraw, event, this);
-		ofNotifyEvent(textureLoaded, event, this);
+
+		if(texUnit.state == IDLE){ //if texObj is idle, it means the tex is already loaded
+			TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+			event.absolutePath = path;
+			ofNotifyEvent(textureReadyToDraw, event, this);
+			ofNotifyEvent(textureLoaded, event, this);
+		}
+
+		if(texUnit.state == LOADING_TEXTURE){ //once its 100% loaded (or ready to load) it will notify
+
+			//it may be that user requests a tex load while tex is already loading
+			//if we get really unlucky, it may be that it requests it after the event ReadyToDraw has triggered
+			//but before the texture is fully loaded (so state == LOADING_TEXTURE). if that's the case, trigger it here manually.
+			if(isReadyToDraw(texUnit.size, texUnit.index)){
+				TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
+				event.absolutePath = path;
+				ofNotifyEvent(textureReadyToDraw, event, this);
+			}
+		}
 	}
 
 	texUnit.loadCount ++;
@@ -242,7 +270,7 @@ void TexturedObject::update(float timeNow){
 
 			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit
 
-			//see if any of the future sceduled unloads is due
+			//see if any of the future scheduled unloads is due
 			for(size_t i = 0; i < texUnit.scheduledUnloads.size(); i++ ){
 				if( texUnit.scheduledUnloads[i] < timeNow){
 					texUnit.scheduledUnloads.erase(texUnit.scheduledUnloads.begin());
@@ -361,11 +389,16 @@ void TexturedObject::update(float timeNow){
 		}
 	}
 
+	while(pendingReadyToDrawEventNotifications.size() > 0){
+		ofNotifyEvent(textureReadyToDraw, pendingLoadEventNotifications.front(), this);
+		pendingReadyToDrawEventNotifications.erase(pendingReadyToDrawEventNotifications.begin());
+	}
+
 	while(pendingLoadEventNotifications.size() > 0){
-		ofNotifyEvent(textureReadyToDraw, pendingLoadEventNotifications[0], this);
-		ofNotifyEvent(textureLoaded, pendingLoadEventNotifications[0], this);
+		ofNotifyEvent(textureLoaded, pendingLoadEventNotifications.front(), this);
 		pendingLoadEventNotifications.erase(pendingLoadEventNotifications.begin());
 	}
+
 }
 
 

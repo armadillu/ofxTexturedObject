@@ -60,16 +60,17 @@ void MyScreenObject::draw(){
 
 	ofSetColor(255);
 
-	//if((texLoaded || texReadyToDraw)){
-
+	if((texLoaded || texReadyToDraw)){
 		//this will smartly return the right texture, when the intended texture is loaded it returns that
 		//otherwise it retunrs a "loading" texture of your chosing, an error texture, or whatever suits the current state.
 		ofTexture * smartTexture = texObj->getTexture(TEXTURE_ORIGINAL, 0);
+		ofTexture * realTexture = texObj->getRealTexture(TEXTURE_ORIGINAL, 0);
 		ofRectangle mySize = me;
-		ofRectangle texSize = ofRectangle(0,0, smartTexture->getWidth(), smartTexture->getHeight());
+		ofRectangle texSize = ofRectangle(0,0, realTexture->getWidth(), realTexture->getHeight());
 		texSize.scaleTo(mySize);
-		smartTexture->draw(texSize);
-	//}
+		realTexture->draw(texSize);
+
+	}
 
 	if(onScreen){
 		if(waitingForTex){
@@ -97,7 +98,7 @@ void MyScreenObject::draw(){
 		msg += "\nTexture Ready To Draw: " + string(texReadyToDraw ? "TRUE" : "FALSE");
 		msg += "\nTexture Fully loaded: " + string(texLoaded ? "TRUE" : "FALSE");
 		if(texLoaded) msg += "\nLoadTime: " + ofToString(timeToLoad, 1);
-		ofDrawBitmapStringHighlight(msg, me.x, me.y);
+		ofDrawBitmapStringHighlight(msg, me.x, me.y + me.height);
 	}
 }
 
@@ -131,6 +132,7 @@ void MyScreenObject::onTexLoaded(TexturedObject::TextureEventArg & a){
 
 void MyScreenObject::requestTex(){
 
+	//ofLogNotice("MyScreenObject") << ofGetFrameNum() << " - request texture " << this;
 	texLoaded = false;
 	texReadyToDraw = false;
 	waitingForTex = true;
@@ -146,8 +148,10 @@ void MyScreenObject::requestTex(){
 
 void MyScreenObject::releaseTex(){
 
+	//ofLogNotice("MyScreenObject") << ofGetFrameNum() << " - release texture " << this;
 	if(waitingForTex){
 		ofRemoveListener(texObj->textureLoaded, this, &MyScreenObject::onTexLoaded);
+		if(!texReadyToDraw) ofRemoveListener(texObj->textureReadyToDraw, this, &MyScreenObject::onTexReadyToDraw);
 	}
 	texObj->releaseTexture(TEXTURE_ORIGINAL, 0);
 	waitingForTex = false;
