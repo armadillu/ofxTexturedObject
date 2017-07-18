@@ -168,6 +168,7 @@ public:
 	int getTotalLoadCount(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0); //how many times has been loaded since created
 	bool gotErrorLoading(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 	bool loadWasCanceled(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
+	string getInfo(TexturedObjectSize s, int index);
 
 
 	// OBJECT DELETION ///////////////////////////////////////////////////////////////////////////
@@ -246,7 +247,6 @@ private:
 	};
 
 	bool textureExists(TexturedObjectSize s, int index);
-	string getInfo(TexturedObjectSize s, int index);
 
 	vector<TexturedObjectSizeUnit> textures;
 	//vector of structs that holds all images of that object,

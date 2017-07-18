@@ -50,32 +50,54 @@ public:
 		}
 
 		mutex.lock();
-		map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* >::iterator it;
-		it = objectTexturesData.begin();
-		while( it != objectTexturesData.end()){
+		for(auto it : objectTexturesData){
 
-			vector<TexturedObject::TexturedObjectSizeUnit>* textures = it->second;
+			vector<TexturedObject::TexturedObjectSizeUnit>* textures = it.second;
 
 			for(size_t i = 0; i < textures->size(); i++){
 
 				TexturedObject::TexturedObjectSizeUnit & imageSizes = textures->at(i);
 
-				map<TexturedObjectSize, TexturedObject::TextureUnit>::iterator it2 = imageSizes.sizes.begin();
-				while( it2 != imageSizes.sizes.end() ){
+				for(auto it2 : imageSizes.sizes){
 
-					TexturedObjectSize imgSize = it2->first;
+					TexturedObjectSize imgSize = it2.first;
 
-					if(it2->second.loadCount > 0){
+					if(it2.second.loadCount > 0){
+
 						loadedTexturesCount ++;
-						ofTexture * tex = it2->second.texture;
-						if(tex->getWidth() > 0) loadedTextureRealCount++;
-						pixelsInGPU += tex->getWidth() * tex->getHeight();
+						ofTexture * tex = it2.second.texture;
+						if(tex){
+
+							if (tex->isAllocated()) {
+								loadedTextureRealCount++;
+							}
+
+							int w, h;
+							#ifndef TARGET_OPENGLES
+							if (tex->texData.textureTarget == GL_TEXTURE_RECTANGLE_ARB) {
+								w = ofNextPow2(tex->getWidth());
+								h = ofNextPow2(tex->getHeight());
+							} else {
+								w = tex->getWidth();
+								h = tex->getHeight();
+							}
+							#else
+							w = tex->getWidth();
+							h = tex->getHeight();
+							#endif
+
+							int numC = ofGetNumChannelsFromGLFormat(ofGetGLFormatFromInternal(tex->texData.glInternalFormat));
+							pixelsInGPU = w * h * numC;
+							if (tex->hasMipmap()) {
+								pixelsInGPU *= 1.3333; //mipmaps take 33% more memory
+							}
+
+						}
+
 						countBySize[imgSize] ++;
 					}
-					++it2;
 				}
 			}
-			++it;
 		}
 		mutex.unlock();
 		TS_STOP("Texture Stats");
@@ -92,7 +114,7 @@ public:
 		}
 
 		string msg;
-		uint64_t usedBytes = pixelsInGPU * 3 /*rgb*/ * 1.333f /*mipmaps*/;
+		uint64_t usedBytes = pixelsInGPU;
 
 		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount) +
 			"\nloaded Textures (ofTexture*): " + ofToString(loadedTextureRealCount);

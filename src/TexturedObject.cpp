@@ -106,7 +106,7 @@ bool TexturedObject::resolveQueueRedundancies(TextureUnit& texUnit, TextureActio
 			TextureEventArg event = TextureEventArg(true, this, texUnit.texture, texUnit.size, texUnit.index);
 			event.absolutePath = getLocalTexturePath(texUnit.size, texUnit.index);
 
-			if(texUnit.state == IDLE){ //if texObj is idle, it means the tex is already loaded
+			if(texUnit.state == IDLE && isFullyLoaded(texUnit.size, texUnit.index)){ //if texObj is idle, it means the tex is already loaded
 				pendingLoadEventNotifications.push_back(event);
 				pendingReadyToDrawEventNotifications.push_back(event);
 			}
@@ -248,7 +248,7 @@ void TexturedObject::unloadTexture(TextureCommand c, TextureUnit & texUnit){
 		}else{ //we can unload the tex right now
 			texUnit.texture->clear();
 			texUnit.texture->texData.width = 0.0f;
-			texUnit.texture->texData.width = 0.0f;
+			texUnit.texture->texData.height = 0.0f;
 			texUnit.state = IDLE;
 			setFlags(texUnit, false, false, false, false);
 		}
@@ -317,7 +317,7 @@ void TexturedObject::update(float timeNow){
 							if (r.canceledLoad){ //tex load was cancelled, we can now clear the texture
 								texUnit.texture->clear();
 								texUnit.texture->texData.width = 0.0f;
-								texUnit.texture->texData.width = 0.0f;
+								texUnit.texture->texData.height = 0.0f;
 							}else{
 								ofLogFatalError("TexturedObject") << "wtf! expected a cancel, got a load!" << getInfo(texUnit.size, texUnit.index);
 							}
@@ -390,7 +390,7 @@ void TexturedObject::update(float timeNow){
 	}
 
 	while(pendingReadyToDrawEventNotifications.size() > 0){
-		ofNotifyEvent(textureReadyToDraw, pendingLoadEventNotifications.front(), this);
+		ofNotifyEvent(textureReadyToDraw, pendingReadyToDrawEventNotifications.front(), this);
 		pendingReadyToDrawEventNotifications.erase(pendingReadyToDrawEventNotifications.begin());
 	}
 
@@ -537,7 +537,7 @@ bool TexturedObject::isUnloading(TexturedObjectSize s, int index){
 bool TexturedObject::isWaitingForCancelToFinish(TexturedObjectSize s, int index){
 	SETUP_CHECK_RET_NULL
 	if(!textureExists(s, index)){
-		return 0;
+		return false;
 	}
 	return textures[index].sizes[s].state == WAITING_FOR_CANCEL_TO_FINISH;
 }

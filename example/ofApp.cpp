@@ -2,7 +2,7 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 100;
+int numObj = 500;
 float objScale = 0.1;
 
 
@@ -117,6 +117,8 @@ void ofApp::setup(){
 
 void ofApp::update(){
 
+	TSGL_START("gl u");
+
 	float dt = 0.016666;
 	mem.update();
 	if(ofGetFrameNum()%3 == 1){
@@ -158,6 +160,8 @@ void ofApp::update(){
 		s->update(dt, speedFactor, loadMipMaps);
 	}
 	TS_STOP("screenObjects");
+
+	TSGL_STOP("gl u");
 }
 
 

@@ -60,7 +60,7 @@ void MyScreenObject::draw(){
 
 	ofSetColor(255);
 
-	if((texLoaded || texReadyToDraw)){
+	if(texLoaded || texReadyToDraw){
 		//this will smartly return the right texture, when the intended texture is loaded it returns that
 		//otherwise it retunrs a "loading" texture of your chosing, an error texture, or whatever suits the current state.
 		ofTexture * smartTexture = texObj->getTexture(TEXTURE_ORIGINAL, 0);
@@ -112,6 +112,9 @@ void MyScreenObject::setPosition(float x, float y){
 //get notified when texture is ready to draw
 void MyScreenObject::onTexReadyToDraw(TexturedObject::TextureEventArg & a){
 	if(a.tex == tex && waitingForTex){ //note this event may trigger for other objects that request this text, so we check if we are "waitingForTex"
+		if(!a.tex->isAllocated()){
+			ofLogError("MyScreenObject") << "wtf tex not allocated but it should be ready to draw?";
+		}
 		ofRemoveListener(texObj->textureReadyToDraw, this, &MyScreenObject::onTexReadyToDraw);
 		texReadyToDraw = true;
 	}
@@ -121,6 +124,9 @@ void MyScreenObject::onTexReadyToDraw(TexturedObject::TextureEventArg & a){
 //get notified when texture is fully loaded
 void MyScreenObject::onTexLoaded(TexturedObject::TextureEventArg & a){
 	if(a.tex == tex && waitingForTex){ //note this event may trigger for other objects that request this text, so we check if we are "waitingForTex"
+		if(!a.tex->isAllocated()){
+			ofLogError("MyScreenObject") << "wtf tex not allocated but it should be loaded?";
+		}
 		ofRemoveListener(texObj->textureLoaded, this, &MyScreenObject::onTexLoaded);
 		waitingForTex = false;
 		texLoaded = true;
