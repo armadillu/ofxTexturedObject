@@ -7,7 +7,7 @@ int main( ){
 	//ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 
 	ofGLFWWindowSettings winSettings;
-	winSettings.numSamples = 8;
+	winSettings.numSamples = 0;
 	winSettings.width = 1027;
 	winSettings.height = 768;
 

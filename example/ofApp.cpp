@@ -2,8 +2,8 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 50;
-float objectSize = 80;
+int numObj = 400;
+float objScale = 0.1;
 
 
 void ofApp::setup(){
@@ -48,31 +48,35 @@ void ofApp::setup(){
 	// Setup ProgressiveTextureLoadQueue /////////////////////////
 
 	ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
-	q->setNumberSimultaneousLoads( 1 ); //N threads loading images in the bg
-	q->setTexLodBias(0.2); //MipMap sharpness
 	q->setVerbose(false);
 
 	// Setup our TexturedObjects /////////////////////////////////
 
-	ifstream infile;
-	char cNum[1024] ; //load image list
-	infile.open (ofToDataPath("images.sorted.txt").c_str(), ifstream::in);
-	if (infile.is_open()){
-		while (infile.good()){
-			infile.getline(cNum, 1024, '\n');
-			imagePaths.push_back(string(cNum));
-		}
-		infile.close();
+	ofDirectory dir;
+	dir.allowExt("jpeg");
+	dir.allowExt("jpg");
+	dir.allowExt("png");
+
+	dir.listDir("images");
+	int n = dir.numFiles();
+	for(int i = 0; i < n; i++){
+		imagePaths.push_back(dir.getPath(i));
 	}
 
 	//create TextureObjects
-	for(int i = 0; i < numObj; i++){
+	for(auto & path : imagePaths){
 		MyTexturedObject* o = new MyTexturedObject();
-		o->setup(imagePaths[i%(imagePaths.size())], screen, objectSize);
-		objs.push_back(o);
+		o->setup(path);
+		textureObjects.push_back(o);
 	}
 
-
+	//create Screen Objects
+	for(int i = 0; i < numObj; i++){
+		MyScreenObject* o = new MyScreenObject();
+		auto randomTexObject = textureObjects[i%(textureObjects.size())];
+		o->setup(randomTexObject, screen, objScale);
+		screenObjects.push_back(o);
+	}
 
 	//start ofxRemoteUI Server
 	RUI_SETUP();
@@ -108,13 +112,12 @@ void ofApp::setup(){
 	TIME_SAMPLE_SET_FRAMERATE(60);
 	TIME_SAMPLE_ENABLE();
 	TIME_SAMPLE_SET_DRAW_LOCATION(TIME_MEASUREMENTS_TOP_RIGHT);
-
-
 }
 
 
 void ofApp::update(){
 
+	float dt = 0.016666;
 	mem.update();
 	if(ofGetFrameNum()%3 == 1){
 		memPlot->update(mem.getProcessMemory());
@@ -136,20 +139,25 @@ void ofApp::update(){
 	TexturedObjectConfig::one().setDefaultTextureUnloadDelay(texUnloadDelay);
 
 	if(resetAll){
-		for(int i = 0; i < numObj; i++){
-			objs[i]->pos.x = ofRandom(ofGetWidth());
-			objs[i]->pos.y = ofRandom(ofGetHeight() - 100);
+		for(auto s : screenObjects){
+			s->setPosition(ofRandom(ofGetWidth()), ofRandom(ofGetHeight() - 200) );
 		}
 		resetAll = false;
 		RUI_PUSH_TO_CLIENT();
 	}
 
-	TS_START("objs");
-	for(int i = 0; i < numObj; i++){
-		objs[i]->setResizeQuality(resizeQuality);
-		objs[i]->update(speedFactor, texUnloadDelay, loadMipMaps);
+	TS_START("texObjects");
+	float timeNow = ofGetElapsedTimef();
+	for(auto s : textureObjects){
+		s->update(timeNow);
 	}
-	TS_STOP("objs");
+	TS_STOP("texObjects");
+
+	TS_START("screenObjects");
+	for(auto s : screenObjects){
+		s->update(dt, speedFactor, loadMipMaps);
+	}
+	TS_STOP("screenObjects");
 }
 
 
@@ -157,28 +165,27 @@ void ofApp::draw(){
 
 	ofSetColor(255);
 	ofNoFill();
-	ofRect(*screen);
+	ofDrawRectangle(*screen);
 	ofFill();
 
-	for(int i = 0; i < numObj; i++){
-		objs[i]->draw();
+	for(auto s : screenObjects){
+		s->draw();
 	}
 
 	int y = 40;
 	int x = 20;
 
 	TexturedObjectStats::one().draw(x, y);
-	y += 16 * 8 + 4;
+	y += 16 * 4 + 4;
 
 	ProgressiveTextureLoadQueue::instance()->draw(x, y);
 	y += 52 + ProgressiveTextureLoadQueue::instance()->getNumBusy() * 15;
 
 	//see avg load times
 	float avgTime = 0;
-	int numLoaded = 0;
-	for(int i = 0; i < numObj; i++){
-		if(objs[i]->texLoaded){
-			avgTime += objs[i]->timeToLoad;
+	for(auto s : screenObjects){
+		if(s->isTexLoaded()){
+			avgTime += s->getLastLoadTime();
 		}
 	}
 
@@ -194,6 +201,11 @@ void ofApp::keyPressed(int key){
 	if(key == 'w'){
 		screenSetup.cycleToNextScreenMode();
 	}
+
+	if(key == 'r'){
+		resetAll = true;
+	}
+
 }
 
 

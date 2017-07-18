@@ -1,4 +1,0 @@
-cat.jpg
-molly.jpg
-seal.jpg
-turtle.jpg

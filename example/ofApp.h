@@ -6,7 +6,9 @@
 #include "ofxMemoryUsage.h"
 #include "ofxTimeMeasurements.h"
 #include "ofxRemoteUIServer.h"
+
 #include "MyTexturedObject.h"
+#include "MyScreenObject.h"
 #include "ofxHistoryPlot.h"
 #include "ofxRemoteUIServer.h"
 
@@ -31,7 +33,8 @@ public:
 	// APP SETUP ////////////////////////////////////////////
 
 	vector<string> imagePaths;
-	vector<MyTexturedObject*> objs;
+	vector<MyTexturedObject*> textureObjects;
+	vector<MyScreenObject*> screenObjects;
 
 	ofRectangle * screen;
 
