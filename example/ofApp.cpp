@@ -2,8 +2,8 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 500;
-float objScale = 0.1;
+int numObj = 600;
+float objSize = 64; //pix
 
 
 void ofApp::setup(){
@@ -74,14 +74,14 @@ void ofApp::setup(){
 	for(int i = 0; i < numObj; i++){
 		MyScreenObject* o = new MyScreenObject();
 		auto randomTexObject = textureObjects[i%(textureObjects.size())];
-		o->setup(randomTexObject, screen, objScale);
+		o->setup(randomTexObject, screen, objSize);
 		screenObjects.push_back(o);
 	}
 
 	//start ofxRemoteUI Server
 	RUI_SETUP();
 
-	windowSize = 400;
+	windowSizeX = windowSizeY = 400;
 	maxTexRequestsPerFrame = 20;
 	RUI_NEW_GROUP("TEXTURE LOADER");
 	RUI_SHARE_PARAM(texLoadTimePerFrame, 0.001, 10);
@@ -105,7 +105,8 @@ void ofApp::setup(){
 
 	RUI_SHARE_PARAM(speedFactor, 0.00, 500);
 	RUI_SHARE_PARAM(resetAll);
-	RUI_SHARE_PARAM(windowSize, 10, 1200);
+	RUI_SHARE_PARAM(windowSizeX, 10, 1200);
+	RUI_SHARE_PARAM(windowSizeY, 10, 1200);
 
 	RUI_LOAD_FROM_XML();
 
@@ -125,12 +126,10 @@ void ofApp::update(){
 		memPlot->update(mem.getProcessMemory());
 	}
 
-	if(ofGetFrameNum() > 10){
-		screen->x = ofGetMouseX();
-		screen->y = ofGetMouseY();
-		screen->width = windowSize;
-		screen->height = windowSize;
-	}
+	screen->x = ofGetMouseX();
+	screen->y = ofGetMouseY();
+	screen->width = windowSizeX;
+	screen->height = windowSizeY;
 
 	//UPDATE ProgressiveTextureLoadQueue settings
 	ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
@@ -187,13 +186,17 @@ void ofApp::draw(){
 
 	//see avg load times
 	float avgTime = 0;
+	int numSamples = 0;
 	for(auto s : screenObjects){
 		if(s->isTexLoaded()){
 			avgTime += s->getLastLoadTime();
+			numSamples++;
 		}
 	}
 
-	ofDrawBitmapStringHighlight("avg loadTime: " + ofToString(avgTime, 2), 20, ofGetHeight() - 160);
+	if(numSamples > 0){
+		ofDrawBitmapStringHighlight("avg loadTime: " + ofToString(avgTime / numSamples, 2) + " sec", 20, ofGetHeight() - 160);
+	}
 
 	int dh = 120;
 	memPlot->draw(0, ofGetHeight() - dh, ofGetWidth(), dh);

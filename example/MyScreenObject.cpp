@@ -14,20 +14,23 @@ MyScreenObject::MyScreenObject(){
 }
 
 
-void MyScreenObject::setup(MyTexturedObject * texObj, ofRectangle * loadArea, float objScale){
+void MyScreenObject::setup(MyTexturedObject * texObj, ofRectangle * loadArea, float objSize){
 
+	this->objSize = objSize;
 	this->texObj = texObj;
 	this->loadArea = loadArea;
 
-	vel = ofVec2f(ofRandom(0.5, 6), ofRandom(-1, 1));
+	vel = ofVec2f(ofRandom(5, 6), ofRandom(-1, 1));
 
-	me.width = texObj->getTextureDimensions(TEXTURE_ORIGINAL, 0).x * objScale;
-	me.height = texObj->getTextureDimensions(TEXTURE_ORIGINAL, 0).y * objScale;
+	ofRectangle maxSize = ofRectangle(0,0,objSize,objSize);
+
+	me.width = texObj->getTextureDimensions(TEXTURE_ORIGINAL, 0).x;
+	me.height = texObj->getTextureDimensions(TEXTURE_ORIGINAL, 0).y;
+	me.scaleTo(maxSize);
 	me.x = ofRandom(0, ofGetWidth() - me.width);
 	me.y = ofRandom(0, ofGetHeight() - BOTTOM_GAP - me.height);
 
 	tex = texObj->getRealTexture(TEXTURE_ORIGINAL, 0); //get hold of the real ofTexure*
-
 }
 
 

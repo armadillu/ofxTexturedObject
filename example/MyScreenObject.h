@@ -22,7 +22,7 @@ public:
 	
 	MyScreenObject();
 
-	void setup(MyTexturedObject * texObj, ofRectangle * loadArea, float objScale);
+	void setup(MyTexturedObject * texObj, ofRectangle * loadArea, float objSize);
 
 	void update(float dt, float speedGain, bool useMipmaps);
 
@@ -60,5 +60,6 @@ protected:
 	bool onScreen = false;
 
 	bool withMipmaps;
+	float objSize;
 };
 

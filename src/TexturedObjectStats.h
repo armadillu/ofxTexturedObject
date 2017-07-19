@@ -22,11 +22,13 @@ public:
 		return instance;
 	}
 
+
 	void addTextureObject(TexturedObject * obj){
 		mutex.lock();
 		objectTexturesData[obj] = &obj->textures;
 		mutex.unlock();
 	}
+
 
 	void removeTextureObject(TexturedObject * obj){
 		mutex.lock();
@@ -37,6 +39,7 @@ public:
 		}
 		mutex.unlock();
 	}
+
 
 	void update(){
 
@@ -87,7 +90,7 @@ public:
 							#endif
 
 							int numC = ofGetNumChannelsFromGLFormat(ofGetGLFormatFromInternal(tex->texData.glInternalFormat));
-							pixelsInGPU = w * h * numC;
+							pixelsInGPU += w * h * numC;
 							if (tex->hasMipmap()) {
 								pixelsInGPU *= 1.3333; //mipmaps take 33% more memory
 							}
@@ -103,9 +106,11 @@ public:
 		TS_STOP("Texture Stats");
 	}
 
+
 	void draw(int x, int y){
 		ofDrawBitmapStringHighlight(getStatsAsText(), x, y, ofColor::black, ofColor::yellow);
 	}
+
 
 	string getStatsAsText() {
 		//not all the time TODO!
@@ -130,19 +135,8 @@ public:
 		return msg;
 	}
 
-private:
 
-	map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* > objectTexturesData;
-
-	int loadedTexturesCount;
-	int loadedTextureRealCount;
-	int countBySize[TEXTURE_OBJECT_NUM_SIZES];
-
-	uint64_t pixelsInGPU;
-
-	ofMutex mutex;
-
-	string bytesToHumanReadable(long long bytes, int decimalPrecision){
+	static string bytesToHumanReadable(uint64_t bytes, int decimalPrecision){
 		string ret;
 		if (bytes < 1024 ){ //if in bytes range
 			ret = ofToString(bytes) + " bytes";
@@ -159,6 +153,19 @@ private:
 		}
 		return ret;
 	}
+
+
+private:
+
+	map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* > objectTexturesData;
+
+	int loadedTexturesCount;
+	int loadedTextureRealCount;
+	int countBySize[TEXTURE_OBJECT_NUM_SIZES];
+
+	uint64_t pixelsInGPU;
+
+	ofMutex mutex;
 
 };
 

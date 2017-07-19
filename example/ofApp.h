@@ -49,7 +49,8 @@ public:
 	float texUnloadDelay;
 	bool resetAll;
 	bool loadMipMaps;
-	float windowSize;
+	float windowSizeY;
+	float windowSizeX;
 
 	int scanlinesPerLoop;
 	int maxTexRequestsPerFrame;
