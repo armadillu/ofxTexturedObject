@@ -30,7 +30,7 @@ protected:
 		ofBackground(22);
 
 		// setup a listener for changed window modes /////////
-		screenSetup.setup(ofGetWidth(), ofGetHeight(), ofxScreenSetup::FULL_ONE_MONITOR);
+		screenSetup.setup(ofGetWidth(), ofGetHeight(), ofxScreenSetup::WINDOWED);
 
 		// SETUP REMOTE UI ///////////////////////////////////
 		RUI_SET_CONFIGS_DIR(CONFIGS_DIRECTORY);
