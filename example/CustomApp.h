@@ -53,6 +53,7 @@ protected:
 		TIME_SAMPLE_GET_INSTANCE()->setUiScale( 1.0 ); //bigger ui in 4k screens
 		TIME_SAMPLE_GET_INSTANCE()->drawUiWithFontStash("fonts/VeraMono.ttf");
 		TIME_SAMPLE_GET_INSTANCE()->setDrawAllPlotsOnTopOfEachOther(false);
+		TIME_SAMPLE_GET_INSTANCE()->setSavesSettingsOnExit(false);
 
 	}
 
