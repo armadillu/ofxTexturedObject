@@ -180,6 +180,8 @@ public:
 	// 0 - NEVER EVER EVER delete a TexturedObject directly, or you will get a crash if a thread is still loading it!
 	virtual void deleteWithGC() = 0; // call this instead of delete!
 
+	void waitForThread(long ms = -1);
+
 	// PUBLIC OF EVENTS //////////////////////////////////////////////////////////////////////////
 
 	ofEvent<TextureEventArg> textureLoaded; //completely loaded

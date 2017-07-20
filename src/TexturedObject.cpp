@@ -38,6 +38,20 @@ void TexturedObject::deleteWithGC(){
 	TexturedObjectGC::instance()->addToGarbageCollectorQueue(this);
 }
 
+void TexturedObject::waitForThread(long ms){
+	for (size_t j = 0; j < textures.size(); j++) {
+		map<TexturedObjectSize, TextureUnit>::iterator it = textures[j].sizes.begin();
+		while (it != textures[j].sizes.end()) {
+			TextureUnit & texUnit = it->second; //out shortcut to the current texUnit
+			if (texUnit.state == LOADING_TEXTURE) {
+				if (texUnit.loader) {
+					texUnit.loader->waitForThread(ms);
+				}
+			}
+			++it;
+		}
+	}
+}
 
 #pragma mark -
 // TEXTURE COMMANDS

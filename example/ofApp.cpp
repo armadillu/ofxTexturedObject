@@ -215,6 +215,15 @@ void ofApp::keyPressed(int key){
 
 }
 
+void ofApp::exit() {
+
+	for (auto t : textureObjects) {
+		if (t->isLoadingTextures()) {
+			t->waitForThread();
+		}
+	}
+
+}
 
 //////// CALLBACKS //////////////////////////////////////
 

@@ -34,6 +34,7 @@ protected:
 
 		// SETUP REMOTE UI ///////////////////////////////////
 		RUI_SET_CONFIGS_DIR(CONFIGS_DIRECTORY);
+		RUI_SET_SAVES_ON_EXIT(false);
 		RUI_GET_INSTANCE()->setUiColumnWidth(400);
 		RUI_GET_INSTANCE()->setBuiltInUiScale(1.0f); //bigger ui in 4k screens
 		RUI_GET_INSTANCE()->drawUiWithFontStash("fonts/VeraMono-Bold.ttf");
