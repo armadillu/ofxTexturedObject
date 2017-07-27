@@ -37,7 +37,7 @@ protected:
 		RUI_SET_SAVES_ON_EXIT(false);
 		RUI_GET_INSTANCE()->setUiColumnWidth(400);
 		RUI_GET_INSTANCE()->setBuiltInUiScale(1.0f); //bigger ui in 4k screens
-		RUI_GET_INSTANCE()->drawUiWithFontStash("fonts/VeraMono-Bold.ttf");
+		//RUI_GET_INSTANCE()->drawUiWithFontStash("fonts/VeraMono-Bold.ttf");
 
 		RUI_SETUP();
 
@@ -51,7 +51,7 @@ protected:
 		TIME_SAMPLE_SET_REMOVE_EXPIRED_THREADS(true);
 		TIME_SAMPLE_GET_INSTANCE()->setDeadThreadTimeDecay(0.985);
 		TIME_SAMPLE_GET_INSTANCE()->setUiScale( 1.0 ); //bigger ui in 4k screens
-		TIME_SAMPLE_GET_INSTANCE()->drawUiWithFontStash("fonts/VeraMono.ttf");
+		//TIME_SAMPLE_GET_INSTANCE()->drawUiWithFontStash("fonts/VeraMono.ttf");
 		TIME_SAMPLE_GET_INSTANCE()->setDrawAllPlotsOnTopOfEachOther(false);
 		TIME_SAMPLE_GET_INSTANCE()->setSavesSettingsOnExit(false);
 

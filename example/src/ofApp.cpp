@@ -18,6 +18,7 @@ void ofApp::setup(){
 
 	screen = new ofRectangle(0,0,0,0);
 
+	#if CHECK_MEM_USE
 	memPlot = new ofxHistoryPlot(NULL, "RAM", 1000, false);
 	memPlot->setLowerRange(0);
 	memPlot->setColor( ofColor(0,255,0) ); //color of the plot line
@@ -29,6 +30,7 @@ void ofApp::setup(){
 	memPlot->setDrawGrid(true);
 	memPlot->setGridColor(ofColor(30)); //grid lines color
 	memPlot->setGridUnit(14);
+	#endif
 
 	// Setup TexturedObjectConfig /////////////////////////
 
@@ -121,10 +123,12 @@ void ofApp::update(){
 	TSGL_START("gl u");
 
 	float dt = 0.016666;
+	#if CHECK_MEM_USE
 	mem.update();
 	if(ofGetFrameNum()%3 == 1){
 		memPlot->update(mem.getProcessMemory());
 	}
+	#endif
 
 	screen->x = ofGetMouseX();
 	screen->y = ofGetMouseY();
@@ -198,8 +202,10 @@ void ofApp::draw(){
 		ofDrawBitmapStringHighlight("avg loadTime: " + ofToString(avgTime / numSamples, 2) + " sec", 20, ofGetHeight() - 160);
 	}
 
+	#if CHECK_MEM_USE
 	int dh = 120;
 	memPlot->draw(0, ofGetHeight() - dh, ofGetWidth(), dh);
+	#endif
 }
 
 

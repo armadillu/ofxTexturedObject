@@ -1,0 +1,9 @@
+ofxTimeMeasurements
+ofxRemoteUI
+ofxPoco
+ofxOsc
+ofxXmlSettings
+ofxProgressiveTextureLoad
+ofxOpenCV
+ofxScreenSetup
+ofxTexturedObject

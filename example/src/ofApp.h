@@ -1,9 +1,14 @@
 #pragma once
 
+#define CHECK_MEM_USE false
+
 #include "ofMain.h"
 #include "CustomApp.h"
 
-#include "ofxMemoryUsage.h"
+#if CHECK_MEM_USE
+	#include "ofxMemoryUsage.h"
+#endif
+
 #include "ofxTimeMeasurements.h"
 #include "ofxRemoteUIServer.h"
 
@@ -57,8 +62,10 @@ public:
 	int maxTexRequestsPerFrame;
 	int maxThreads;
 
+	#if CHECK_MEM_USE
 	ofxMemoryUsage mem;
 	ofxHistoryPlot * memPlot;
+	#endif
 
 	int resizeQuality; // CV_INTER_NN, CV_INTER_LINEAR, CV_INTER_CUBIC*, CV_INTER_AREA, CV_INTER_LANCZOS4
 
