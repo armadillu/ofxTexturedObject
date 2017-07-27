@@ -4,6 +4,6 @@ ofxPoco
 ofxOsc
 ofxXmlSettings
 ofxProgressiveTextureLoad
-ofxOpenCV
+ofxOpenCv
 ofxScreenSetup
 ofxTexturedObject
