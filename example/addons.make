@@ -1,4 +1,5 @@
 ofxTimeMeasurements
+ofxHistoryPlot
 ofxRemoteUI
 ofxPoco
 ofxOsc
