@@ -27,7 +27,7 @@ private:
 	void update(ofEventArgs &a);
 
 
-	vector<TexturedObject*> 	pendingDeletion;
+	std::vector<TexturedObject*> 	pendingDeletion;
 	static TexturedObjectGC*	singleton;
 	ofMutex 					mutex;
 };

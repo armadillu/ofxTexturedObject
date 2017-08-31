@@ -8,6 +8,8 @@
 
 #include "TexturedObjectConfig.h"
 
+using namespace std;
+
 TexturedObjectConfig::TexturedObjectConfig(){
 	missingTex = NULL;
 	errorTex = NULL;

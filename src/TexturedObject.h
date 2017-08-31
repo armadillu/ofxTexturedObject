@@ -45,7 +45,7 @@ public:
 		ofTexture *			tex;
 		TexturedObjectSize 	size;
 		int 				textureIndex;
-		string 				absolutePath;
+		std::string 				absolutePath;
 		float 				elapsedTime;
 		TextureEventArg(){
 			tex = NULL;
@@ -75,7 +75,7 @@ public:
 	 **/
 	
 	void setup(int numTextures, TexturedObjectSize size);
-	void setup(int numTextures, vector<TexturedObjectSize> sizes );
+	void setup(int numTextures, std::vector<TexturedObjectSize> sizes );
 	bool isSetup(){return hasBeenSetup;}
 
 	void update(float timeNow = ofGetElapsedTimef()); 	//arg should be ofGetElapsedTimef();
@@ -94,7 +94,7 @@ public:
 	virtual ofVec2f getTextureDimensions(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0) = 0;
 
 	//This is where your subclass specifies where actual texture files are.
-	virtual string getLocalTexturePath(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0) = 0;
+	virtual std::string getLocalTexturePath(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0) = 0;
 
 
 	// CONFIG //////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +168,7 @@ public:
 	int getTotalLoadCount(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0); //how many times has been loaded since created
 	bool gotErrorLoading(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
 	bool loadWasCanceled(TexturedObjectSize s = TEXTURE_ORIGINAL, int index = 0);
-	string getInfo(TexturedObjectSize s, int index);
+	std::string getInfo(TexturedObjectSize s, int index);
 
 
 	// OBJECT DELETION ///////////////////////////////////////////////////////////////////////////
@@ -216,9 +216,9 @@ private:
 	struct TextureUnit{
 		TexturedObjectSize											size;
 		int													index;
-		vector<TextureCommand>								pendingCommands;
-		vector<ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent>		loaderResponses;
-		vector<float>										scheduledUnloads;
+		std::vector<TextureCommand>								pendingCommands;
+		std::vector<ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent>		loaderResponses;
+		std::vector<float>										scheduledUnloads;
 		TextureState										state;
 		ofxProgressiveTextureLoad*							loader;
 		ofTexture *											texture;
@@ -240,7 +240,7 @@ private:
 	};
 
 	struct TexturedObjectSizeUnit{
-		map<TexturedObjectSize, TextureUnit> sizes;
+		std::map<TexturedObjectSize, TextureUnit> sizes;
 	};
 
 	struct TextureInfo{
@@ -250,12 +250,12 @@ private:
 
 	bool textureExists(TexturedObjectSize s, int index);
 
-	vector<TexturedObjectSizeUnit> textures;
+	std::vector<TexturedObjectSizeUnit> textures;
 	//vector of structs that holds all images of that object,
 	//each image has several sizes available.
 
 	//given a texture file path, store its ID and imgSize
-	map<ofTexture*, TextureInfo> texToTexInfo;
+	std::map<ofTexture*, TextureInfo> texToTexInfo;
 
 	//texture loader callbacks
 	void textureDidLoad(ofxProgressiveTextureLoad::ProgressiveTextureLoadEvent &e);
@@ -274,11 +274,11 @@ private:
 
 	bool hasBeenSetup;
 
-	ofxProgressiveTextureLoad* addToLoadQueue( ofTexture* tex, bool mipmap, bool highPriority, string path);
+	ofxProgressiveTextureLoad* addToLoadQueue( ofTexture* tex, bool mipmap, bool highPriority, std::string path);
 
 	ofTexture* getLoadingTexture();
 
-	void storeTexPathInfo(TextureUnit & u, const string & path);
+	void storeTexPathInfo(TextureUnit & u, const std::string & path);
 	void checkLoadCount(TextureUnit & u);
 
 	// ############################################################
@@ -294,8 +294,8 @@ private:
 
 	//those are covering the notifications that would have been lost otherwise
 	//bc they are "eaten up" by queue redundancies (ie "load + unload + load" = "load")
-	vector<TextureEventArg> pendingLoadEventNotifications;
-	vector<TextureEventArg> pendingReadyToDrawEventNotifications;
+	std::vector<TextureEventArg> pendingLoadEventNotifications;
+	std::vector<TextureEventArg> pendingReadyToDrawEventNotifications;
 
 	int resizeQuality;
 

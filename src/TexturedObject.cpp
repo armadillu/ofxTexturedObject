@@ -10,6 +10,8 @@
 #include "TexturedObjectStats.h"
 #include "TexturedObjectGC.h"
 
+using namespace std;
+
 TexturedObject::TexturedObject(){
 	hasBeenSetup = false;
 	resizeQuality = CV_INTER_CUBIC;

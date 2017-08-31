@@ -35,7 +35,7 @@ void TexturedObjectGC::addToGarbageCollectorQueue(TexturedObject * p){
 void TexturedObjectGC::update(ofEventArgs &a){
 
 	mutex.lock();
-	vector<int> indicesToDelete;
+	std::vector<int> indicesToDelete;
 	for(size_t i = 0; i < pendingDeletion.size(); i++){
 		if (!pendingDeletion[i]->isLoadingTextures()){
 			TexturedObjectStats::one().removeTextureObject(pendingDeletion[i]);

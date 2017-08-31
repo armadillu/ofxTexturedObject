@@ -42,7 +42,7 @@ private:
 	ofTexture* missingTex;
 	ofTexture* errorTex;
 	ofTexture* cancelingTex;
-	vector<ofTexture*> loadingTex;
+	std::vector<ofTexture*> loadingTex;
 	float unloadTextureDelayDefaults;
 
 };

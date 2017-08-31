@@ -32,7 +32,7 @@ public:
 
 	void removeTextureObject(TexturedObject * obj){
 		mutex.lock();
-		map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* >::iterator it;
+		std::map<TexturedObject*, std::vector<TexturedObject::TexturedObjectSizeUnit>* >::iterator it;
 		it = objectTexturesData.find(obj);
 		if (it != objectTexturesData.end() ){
 			objectTexturesData.erase(it);
@@ -55,7 +55,7 @@ public:
 		mutex.lock();
 		for(auto it : objectTexturesData){
 
-			vector<TexturedObject::TexturedObjectSizeUnit>* textures = it.second;
+			std::vector<TexturedObject::TexturedObjectSizeUnit>* textures = it.second;
 
 			for(size_t i = 0; i < textures->size(); i++){
 
@@ -112,13 +112,13 @@ public:
 	}
 
 
-	string getStatsAsText() {
+	std::string getStatsAsText() {
 		//not all the time TODO!
 		if (ofGetFrameNum() % 30 == 0) {
 			update();
 		}
 
-		string msg;
+		std::string msg;
 		uint64_t usedBytes = pixelsInGPU;
 
 		msg = "loaded Textures (retainCount): " + ofToString(loadedTexturesCount) +
@@ -136,8 +136,8 @@ public:
 	}
 
 
-	static string bytesToHumanReadable(uint64_t bytes, int decimalPrecision){
-		string ret;
+	static std::string bytesToHumanReadable(uint64_t bytes, int decimalPrecision){
+		std::string ret;
 		if (bytes < 1024) { //if in bytes range
 			ret = ofToString(bytes) + " bytes";
 		} else {
@@ -161,7 +161,7 @@ public:
 
 private:
 
-	map<TexturedObject*, vector<TexturedObject::TexturedObjectSizeUnit>* > objectTexturesData;
+	std::map<TexturedObject*, std::vector<TexturedObject::TexturedObjectSizeUnit>* > objectTexturesData;
 
 	int loadedTexturesCount;
 	int loadedTextureRealCount;
