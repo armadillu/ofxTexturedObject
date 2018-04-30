@@ -308,6 +308,7 @@ private:
 	std::vector<TextureEventArg> pendingReadyToDrawEventNotifications;
 
 	int resizeQuality;
+	float timeGCwasRequested = -1;
 
 };
 

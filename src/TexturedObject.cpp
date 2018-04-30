@@ -42,6 +42,7 @@ void TexturedObject::deleteWithGC(){
 			++it;
 		}
 	}
+	timeGCwasRequested = ofGetElapsedTimef();
 	//and then add to GC, so that we can delete when no texts are being loaded
 	TexturedObjectGC::instance()->addToGarbageCollectorQueue(this);
 }
