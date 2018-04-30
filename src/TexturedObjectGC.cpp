@@ -38,11 +38,10 @@ void TexturedObjectGC::update(ofEventArgs &a){
 	std::vector<int> indicesToDelete;
 	for(size_t i = 0; i < pendingDeletion.size(); i++){
 		if (!pendingDeletion[i]->isLoadingTextures()){
-			TexturedObjectStats::one().removeTextureObject(pendingDeletion[i]);
+			//TexturedObjectStats::one().removeTextureObject(pendingDeletion[i]);
 			delete pendingDeletion[i];
 			pendingDeletion[i] = NULL;
 			indicesToDelete.push_back(i);
-
 		}else{
 			ofLogNotice("TexturedObjectGC") << "still waiting to delete " << pendingDeletion[i] << "..." ;
 		}

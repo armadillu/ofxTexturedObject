@@ -12,6 +12,12 @@
 
 using namespace std;
 
+#define SETUP_CHECK				if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return; }
+#define SETUP_CHECK_RET_NULL	if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return NULL; }
+#define SETUP_CHECK_RET_FALSE	if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return false; }
+#define TEX_EXISTS_CHECK		if(!textureExists(s, index)){ ofLogError() << "TexturedObject tex does not exist!"; return;}
+
+
 TexturedObject::TexturedObject(){
 	hasBeenSetup = false;
 	resizeQuality = CV_INTER_CUBIC;
@@ -663,3 +669,20 @@ string TexturedObject::getInfo(TexturedObjectSize s, int index){
  	return info.str();
 }
 
+std::string TexturedObject::toString(TexturedObjectSize s){
+
+	switch (s) {
+
+			/// ADD / MODIFY texture sizes AS NEEDED TO MATCH YOUR ENUM LIST!!
+		case TEXTURE_SMALL: return "TEXTURE_SMALL";
+		case TEXTURE_MEDIUM: return "TEXTURE_MEDIUM";
+		case TEXTURE_LARGE: return "TEXTURE_LARGE";
+		case TEXTURE_ORIGINAL: return "TEXTURE_ORIGINAL";
+	}
+	return "TEXTURE_OBJECT_UNKNOWN";
+}
+
+#undef SETUP_CHECK
+#undef SETUP_CHECK_RET_NULL
+#undef SETUP_CHECK_RET_FALSE
+#undef TEX_EXISTS_CHECK

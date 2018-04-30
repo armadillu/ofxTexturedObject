@@ -10,7 +10,6 @@
 #define __CollectionTable__TexturedObject__
 
 #include "ofMain.h"
-#include "TexturedObjectSizes.h"
 #include "TexturedObjectConfig.h"
 #include "ofxProgressiveTextureLoad.h"
 #include "ProgressiveTextureLoadQueue.h"
@@ -23,10 +22,20 @@
 using std::tr1::unordered_map;
 #endif
 
-#define SETUP_CHECK				if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return; }
-#define SETUP_CHECK_RET_NULL	if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return NULL; }
-#define SETUP_CHECK_RET_FALSE	if(!hasBeenSetup){ ofLogError() << "TexturedObject being used before setup!"; return false; }
-#define TEX_EXISTS_CHECK	if(!textureExists(s, index)){ ofLogError() << "TexturedObject tex does not exist!"; return;}
+
+enum TexturedObjectSize{
+
+	/// ADD/MODIFY TO SPECIFY YOUR IMAGE SIZES BELOW;
+	/// MUST START FROM 0
+	TEXTURE_SMALL = 0,
+	TEXTURE_MEDIUM,
+	TEXTURE_LARGE,
+	TEXTURE_ORIGINAL,
+
+	//DO NOT EDIT BELOW THIS LINE!
+	TEXTURE_OBJECT_NUM_SIZES,
+	TEXTURE_OBJECT_UNKNOWN = -1
+};
 
 
 class TexturedObject{
@@ -187,6 +196,7 @@ public:
 	ofEvent<TextureEventArg> textureLoaded; //completely loaded
 	ofEvent<TextureEventArg> textureReadyToDraw; //not fully loaded, but drawable! tex->getWidht/height report correct values
 
+	static std::string toString(TexturedObjectSize s);
 
 protected:
 
