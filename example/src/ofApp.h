@@ -17,8 +17,6 @@
 #include "ofxHistoryPlot.h"
 #include "ofxRemoteUIServer.h"
 
-#include "TexturedObjectSizes.h"
-
 class ofApp : public CustomApp{
 
 public:
@@ -48,7 +46,6 @@ public:
 	ofTexture * cancel;
 	ofTexture * error;
 	ofTexture * missing;
-
 
 	float speedFactor;
 	float texLoadTimePerFrame;
