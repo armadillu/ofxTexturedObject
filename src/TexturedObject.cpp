@@ -324,6 +324,8 @@ void TexturedObject::update(float timeNow){
 							case UNLOAD_TEXTURE:
 								unloadTexture(c, texUnit);
 								break;
+
+							default: break;
 						}
 					}
 				}break;
@@ -614,6 +616,8 @@ ofTexture* TexturedObject::getTexture(TexturedObjectSize s, int index){
 			case LOADING_TEXTURE:
 				if(texUnit.readyToDraw) return texUnit.texture;
 				return getLoadingTexture();
+
+			default: break;
 		}
 	}else{
 		if(texUnit.state == WAITING_FOR_CANCEL_TO_FINISH){
@@ -679,6 +683,7 @@ std::string TexturedObject::toString(TexturedObjectSize s){
 		case TEXTURE_MEDIUM: return "TEXTURE_MEDIUM";
 		case TEXTURE_LARGE: return "TEXTURE_LARGE";
 		case TEXTURE_ORIGINAL: return "TEXTURE_ORIGINAL";
+		default: break;
 	}
 	return "TEXTURE_OBJECT_UNKNOWN";
 }
