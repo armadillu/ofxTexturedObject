@@ -2,7 +2,7 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 600;
+int numObj = 50;
 float objSize = 64; //pix
 
 
