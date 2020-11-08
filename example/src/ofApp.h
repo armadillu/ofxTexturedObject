@@ -47,24 +47,24 @@ public:
 	ofTexture * error;
 	ofTexture * missing;
 
-	float speedFactor;
-	float texLoadTimePerFrame;
-	float texUnloadDelay;
+	float speedFactor = 10.0;
+	float texLoadTimePerFrame = 0.1f;
+	float texUnloadDelay = 0.0f;
 	bool resetAll;
-	bool loadMipMaps;
-	float windowSizeY;
-	float windowSizeX;
+	bool loadMipMaps = true;
+	float windowSizeY = 400;
+	float windowSizeX = 400;
 
-	int scanlinesPerLoop;
-	int maxTexRequestsPerFrame;
-	int maxThreads;
+	int scanlinesPerLoop = 4;
+	int maxTexRequestsPerFrame = 100;
+	int maxThreads = 4;
 
 	#if CHECK_MEM_USE
 	ofxMemoryUsage mem;
 	ofxHistoryPlot * memPlot;
 	#endif
 
-	int resizeQuality; // CV_INTER_NN, CV_INTER_LINEAR, CV_INTER_CUBIC*, CV_INTER_AREA, CV_INTER_LANCZOS4
+	int resizeQuality = CV_INTER_AREA; // CV_INTER_NN, CV_INTER_LINEAR, CV_INTER_CUBIC*, CV_INTER_AREA, CV_INTER_LANCZOS4
 
 
 };

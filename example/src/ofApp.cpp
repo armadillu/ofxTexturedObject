@@ -2,8 +2,8 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 50;
-float objSize = 64; //pix
+int numObj = 16;
+float objSize = 200; //pix
 
 
 void ofApp::setup(){
@@ -83,7 +83,6 @@ void ofApp::setup(){
 	//start ofxRemoteUI Server
 	RUI_SETUP();
 
-	windowSizeX = windowSizeY = 400;
 	maxTexRequestsPerFrame = 20;
 	RUI_NEW_GROUP("TEXTURE LOADER");
 	RUI_SHARE_PARAM(texLoadTimePerFrame, 0.001, 10);
