@@ -72,7 +72,6 @@ void MyScreenObject::draw(){
 		ofRectangle texSize = ofRectangle(0,0, realTexture->getWidth(), realTexture->getHeight());
 		texSize.scaleTo(mySize);
 		realTexture->draw(texSize);
-
 	}
 
 	if(onScreen){

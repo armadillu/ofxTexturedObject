@@ -2,8 +2,8 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 128;
-float objSize = 128; //pix
+int numObj = 300;
+float objSize = 150; //pix
 
 
 void ofApp::setup(){
