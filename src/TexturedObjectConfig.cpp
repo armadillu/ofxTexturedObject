@@ -7,6 +7,7 @@
 //
 
 #include "TexturedObjectConfig.h"
+#include <utility>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ void TexturedObjectConfig::setTextures(ofTexture* missing,
 									   vector<ofTexture*> loading){
 	missingTex = missing;
 	errorTex = error;
-	loadingTex = loading;
+	loadingTex = std::move(loading);
 	cancelingTex = canceling;
 }
 

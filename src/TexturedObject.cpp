@@ -182,7 +182,7 @@ void TexturedObject::setup(int numTextures, TexturedObjectSize s){
 }
 
 
-void TexturedObject::setup(int numTextures, vector<TexturedObjectSize> validImageSizes){
+void TexturedObject::setup(int numTextures, const vector<TexturedObjectSize>& validImageSizes){
 
 	if(hasBeenSetup){
         ofLogError("TexturedObject") << "TexturedObject already setup!"; return;
@@ -638,7 +638,7 @@ ofTexture* TexturedObject::getRealTexture(TexturedObjectSize s, int index){
 }
 
 
-ofxProgressiveTextureLoad* TexturedObject::addToLoadQueue(ofTexture * tex, bool mipmap, bool highPriority, string path){
+ofxProgressiveTextureLoad* TexturedObject::addToLoadQueue(ofTexture * tex, bool mipmap, bool highPriority, const string& path){
 
 	ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
 	ofxProgressiveTextureLoad * loader = q->loadTexture(path,	/*file path*/

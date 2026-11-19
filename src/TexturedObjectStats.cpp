@@ -46,7 +46,7 @@ void TexturedObjectStats::update(){
 	}
 
 	mutex.lock();
-	for(auto it : objectTexturesData){
+	for(const auto& it : objectTexturesData){
 
 		auto textures = it.second;
 
@@ -54,7 +54,7 @@ void TexturedObjectStats::update(){
 
 			TexturedObject::TexturedObjectSizeUnit & imageSizes = textures->at(i);
 
-			for(auto it2 : imageSizes.sizes){
+			for(const auto& it2 : imageSizes.sizes){
 
 				TexturedObjectSize imgSize = it2.first;
 

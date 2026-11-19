@@ -84,7 +84,7 @@ public:
 	 **/
 	
 	void setup(int numTextures, TexturedObjectSize size);
-	void setup(int numTextures, std::vector<TexturedObjectSize> sizes );
+	void setup(int numTextures, const std::vector<TexturedObjectSize>& sizes );
 	bool isSetup(){return hasBeenSetup;}
 
 	void update(float timeNow = ofGetElapsedTimef()); 	//arg should be ofGetElapsedTimef();
@@ -284,7 +284,7 @@ private:
 
 	bool hasBeenSetup;
 
-	ofxProgressiveTextureLoad* addToLoadQueue( ofTexture* tex, bool mipmap, bool highPriority, std::string path);
+	ofxProgressiveTextureLoad* addToLoadQueue( ofTexture* tex, bool mipmap, bool highPriority, const std::string& path);
 
 	ofTexture* getLoadingTexture();
 
