@@ -55,7 +55,7 @@ public:
 	float windowSizeY = 400;
 	float windowSizeX = 400;
 
-	int scanlinesPerLoop = 4;
+	int bytesPerLoop = 256 * 1024;
 	int maxTexRequestsPerFrame = 100;
 	int maxThreads = 4;
 

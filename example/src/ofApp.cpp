@@ -2,8 +2,8 @@
 #include "TexturedObject.h"
 #include "TexturedObjectStats.h"
 
-int numObj = 16;
-float objSize = 200; //pix
+int numObj = 128;
+float objSize = 128; //pix
 
 
 void ofApp::setup(){
@@ -87,7 +87,7 @@ void ofApp::setup(){
 	RUI_NEW_GROUP("TEXTURE LOADER");
 	RUI_SHARE_PARAM(texLoadTimePerFrame, 0.001, 10);
 	RUI_SHARE_PARAM(texUnloadDelay, 0.0, 10);
-	RUI_SHARE_PARAM(scanlinesPerLoop, 1, 512);
+	RUI_SHARE_PARAM(bytesPerLoop, 1, 1024 * 1024);
 	RUI_SHARE_PARAM(maxTexRequestsPerFrame, 1, 200);
 	RUI_NEW_COLOR();
 	RUI_SHARE_PARAM(maxThreads, 1, 40);
@@ -137,7 +137,7 @@ void ofApp::update(){
 	//UPDATE ProgressiveTextureLoadQueue settings
 	ProgressiveTextureLoadQueue * q = ProgressiveTextureLoadQueue::instance();
 	q->setTargetTimePerFrame( texLoadTimePerFrame );	//spend at most 'x' milis loading textures per frame
-	q->setScanlinesPerLoop(scanlinesPerLoop);
+	q->setBytesPerLoop(bytesPerLoop);
 	q->setMaximumRequestsPerFrame(maxTexRequestsPerFrame);
 	q->setMaxThreads( maxThreads ); //N threads loading images in the bg
 	TexturedObjectConfig::one().setDefaultTextureUnloadDelay(texUnloadDelay);
